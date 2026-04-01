@@ -1,0 +1,283 @@
+<?php
+
+namespace app\jobs;
+
+use app\models\News;
+use Yii;
+use yii\httpclient\Client;
+
+/**
+ * Джоб для публикации новости в Одноклассниках
+ */
+class OkPublishJob extends SocialPublishJob
+{
+    /**
+     * @var string Кеш URL серверов загрузки
+     */
+    private static $uploadUrlCache = null;
+
+    /**
+     * @inheritdoc
+     */
+    protected function getPublishedAtField(): string
+    {
+        return 'published_at_ok';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function getSocialNetworkName(): string
+    {
+        return 'Одноклассники';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function publish(Client $client, News $news): bool
+    {
+        $message = $this->prepareMessage($news);
+        $images = $this->getImages($news);
+
+        // Загружаем картинки с отказоустойчивостью
+        $uploadedImages = $this->uploadImagesWithFallback($client, $images);
+
+        // Формируем attachment
+        $attachment = [
+            'media' => [
+                [
+                    'type' => 'photo',
+                    'list' => $uploadedImages
+                ],
+                [
+                    'type' => 'text',
+                    'text' => $message
+                ]
+            ]
+        ];
+
+        $attachmentJson = json_encode($attachment);
+
+        try {
+            $response = $this->executeWithRetry(function () use ($client, $attachmentJson) {
+                return $client->createRequest()
+                    ->setMethod('POST')
+                    ->setUrl('https://api.ok.ru/api/mediatopic.post')
+                    ->setData([
+                        'application_key' => Yii::$app->params['OkAppPublicKey'],
+                        'attachment' => $attachmentJson,
+                        'gid' => Yii::$app->params['OkGroupId'],
+                        'type' => 'GROUP_THEME',
+                        'sig' => $this->calculateSignature($attachmentJson),
+                        'access_token' => Yii::$app->params['OkApiKey']
+                    ])
+                    ->send();
+            }, 'mediatopic.post');
+
+            if ($response && $response->isOk) {
+                $hasError = array_key_exists('error_code', (array) $response->data);
+
+                Yii::info('mediatopic.post: ' . ($hasError ? 'ERROR' : 'SUCCESS'), 'jobs-ok');
+                Yii::info($response->data ?? 'No data', 'jobs-ok');
+
+                return !$hasError;
+            }
+
+            Yii::error('mediatopic.post: response is not ok', 'jobs-ok');
+
+            return false;
+
+        } catch (\Exception $e) {
+            Yii::error('mediatopic.post exception: ' . $e->getMessage(), 'jobs-ok');
+
+            return false;
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function uploadImages(Client $client, array $images): array
+    {
+        $result = [];
+
+        foreach ($images as $index => $imagePath) {
+            $uploadedImage = $this->uploadSingleImageOk($client, $imagePath, $index);
+
+            if ($uploadedImage !== null) {
+                $result[] = $uploadedImage;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Загружает картинки с продолжением работы при ошибках
+     *
+     * @param Client $client
+     * @param array $images
+     *
+     * @return array
+     */
+    private function uploadImagesWithFallback(Client $client, array $images): array
+    {
+        $uploadedImages = [];
+        $failedCount = 0;
+
+        foreach ($images as $index => $imagePath) {
+            // Проверяем существование файла
+            if (!$this->imageExists($imagePath)) {
+                Yii::warning("Файл изображения не найден: {$imagePath}", 'jobs-ok');
+                $failedCount++;
+
+                continue;
+            }
+
+            try {
+                $uploadedImage = $this->uploadSingleImageOk($client, $imagePath, $index);
+
+                if ($uploadedImage !== null) {
+                    $uploadedImages[] = $uploadedImage;
+                    Yii::info("Картинка {$index} загружена", 'jobs-ok');
+                } else {
+                    Yii::warning("Не удалось загрузить картинку {$index}: {$imagePath}", 'jobs-ok');
+                    $failedCount++;
+                }
+
+            } catch (\Exception $e) {
+                Yii::error("Ошибка при загрузке картинки {$index}: " . $e->getMessage(), 'jobs-ok');
+                $failedCount++;
+                // Продолжаем загрузку следующих картинок
+            }
+        }
+
+        if ($failedCount > 0) {
+            Yii::warning(
+                "Загружено " . count($uploadedImages) . " из " . count($images) .
+                " картинок (ошибок: {$failedCount})",
+                'jobs-ok'
+            );
+        }
+
+        return $uploadedImages;
+    }
+
+    /**
+     * Загружает одно изображение в Одноклассники
+     *
+     * @param Client $client
+     * @param string $imagePath
+     * @param int $index
+     * @return array|null Токен загруженного изображения или null
+     */
+    private function uploadSingleImageOk(Client $client, string $imagePath, int $index): ?array
+    {
+        // Получаем URL с кешированием
+        $uploadUrl = $this->getOkUploadUrl($client);
+        
+        if (!$uploadUrl) {
+            Yii::error("Не удалось получить URL загрузки (image {$index})", 'jobs-ok');
+            return null;
+        }
+
+        // Шаг 2: Загружаем изображение
+        $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $imagePath) {
+            return $client->createRequest()
+                ->setMethod('POST')
+                ->setUrl($uploadUrl)
+                ->addFile('pic1', Yii::getAlias('@app/web/' . $imagePath))
+                ->send();
+        }, "photo upload (image {$index})");
+
+        if (!$uploadResponse || !$uploadResponse->isOk) {
+            Yii::error("Не удалось загрузить фото на сервер (image {$index})", 'jobs-ok');
+
+            return null;
+        }
+
+        if (array_key_exists('error_code', $uploadResponse->data)) {
+            Yii::error(
+                "API error upload: " . json_encode($uploadResponse->data['error_code']),
+                'jobs-ok'
+            );
+
+            return null;
+        }
+
+        $photos = $uploadResponse->data['photos'] ?? [];
+        if (!empty($photos)) {
+            // Возвращаем токен первой картинки
+            return ['id' => $photos[0]['token']];
+        }
+
+        Yii::error("Пустой массив photos в ответе", 'jobs-ok');
+
+        return null;
+    }
+
+    /**
+     * Вычисляет подпись для запроса к API Одноклассников
+     *
+     * @param string $attachmentJson
+     * @return string
+     */
+    private function calculateSignature(string $attachmentJson): string
+    {
+        return md5(
+            'application_key=' . Yii::$app->params['OkAppPublicKey'] .
+            'attachment=' . $attachmentJson .
+            'format=json' .
+            'gid=' . Yii::$app->params['OkGroupId'] .
+            'method=mediatopic.post' .
+            'type=GROUP_THEME' .
+            Yii::$app->params['OkAppSecretKey']
+        );
+    }
+
+    /**
+     * Получает URL сервера загрузки Одноклассников с кешированием
+     *
+     * @param Client $client
+     * @return string
+     */
+    private function getOkUploadUrl(Client $client): string
+    {
+        // Проверяем кеш
+        if (self::$uploadUrlCache !== null) {
+            return self::$uploadUrlCache;
+        }
+
+        $response = $this->executeWithRetry(function () use ($client) {
+            return $client->createRequest()
+                ->setMethod('POST')
+                ->setUrl('https://api.ok.ru/api/photosV2.getUploadUrl')
+                ->setData([
+                    'count' => 1,
+                    'application_key' => Yii::$app->params['OkAppPublicKey'],
+                    'access_token' => Yii::$app->params['OkApiKey'],
+                    'gid' => Yii::$app->params['OkGroupId']
+                ])
+                ->send();
+        }, 'photosV2.getUploadUrl');
+
+        if (!$response || !$response->isOk) {
+            return '';
+        }
+
+        if (array_key_exists('error_code', $response->data)) {
+            Yii::error("API error getUploadUrl: " . json_encode($response->data['error_code']), 'jobs-ok');
+
+            return '';
+        }
+
+        $uploadUrl = $response->data['upload_url'] ?? null;
+
+        if ($uploadUrl) {
+            self::$uploadUrlCache = $uploadUrl;
+        }
+
+        return $uploadUrl;
+    }
+}

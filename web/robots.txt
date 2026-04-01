@@ -1,0 +1,16 @@
+User-agent: *
+Disallow: /admin
+Disallow: /gii
+Disallow: /subscribe
+
+User-agent: Yandex
+Disallow: /admin
+Disallow: /gii
+Disallow: /subscribe
+
+User-agent: Google
+Disallow: /admin
+Disallow: /gii
+Disallow: /subscribe
+
+Sitemap: https://xn--80abggjugofbdwfe3b6c2dta2a.xn--p1ai/sitemap.xml
