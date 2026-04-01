@@ -44,9 +44,11 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
     /**
      * @param Client $client
      * @param News $news
+     * @param int &$uploadedImagesCount Счётчик загруженных изображений (выходной параметр)
+     * @param int &$failedImagesCount Счётчик неудачных загрузок (выходной параметр)
      * @return bool Успешно ли выполнена публикация
      */
-    protected abstract function publish(Client $client, News $news): bool;
+    protected abstract function publish(Client $client, News $news, int &$uploadedImagesCount = 0, int &$failedImagesCount = 0): bool;
 
     /**
      * @param Client $client
@@ -60,28 +62,35 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
      */
     public function execute($queue): void
     {
+        $news = null;
+        $uploadedImagesCount = 0;
+        $failedImagesCount = 0;
+
         try {
             $news = $this->getNews();
 
             if (!$news) {
                 Yii::warning("Новость с ID {$this->news_id} не найдена", 'jobs-social');
+                $this->sendErrorNotification(null, "Новость с ID {$this->news_id} не найдена в базе данных");
                 return;
             }
 
             $client = new Client();
 
-            $published = $this->publish($client, $news);
+            $published = $this->publish($client, $news, $uploadedImagesCount, $failedImagesCount);
 
             if ($published) {
                 $this->markAsPublished($news);
+                $this->sendSuccessNotification($news, $uploadedImagesCount, $failedImagesCount);
+            } else {
+                $this->sendErrorNotification($news, "Публикация не удалась - API вернуло ошибку");
             }
 
         } catch (\Throwable $e) {
             Yii::error("Ошибка при публикации в {$this->getSocialNetworkName()}: " . $e->getMessage(), 'jobs-social');
             Yii::error($e->getTraceAsString(), 'jobs-social');
 
-            // Не выбрасываем исключение, чтобы не ломать очередь
-            // Но логируем ошибку для последующего анализа
+            $this->sendErrorNotification($news, $e->getMessage());
         }
     }
 
@@ -228,5 +237,89 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
         $fullPath = Yii::getAlias('@app/web/' . $imagePath);
 
         return file_exists($fullPath) && is_readable($fullPath);
+    }
+
+    /**
+     * Отправляет уведомление в Telegram
+     *
+     * @param string $message Текст сообщения
+     * @param bool $isError Это ошибка (красное сообщение)
+     *
+     * @return void
+     */
+    protected function sendTelegramNotification(string $message, bool $isError = false): void
+    {
+        if (empty(Yii::$app->params['telegramDeveloperBotToken']) || empty(Yii::$app->params['telegramDeveloperChatId'])) {
+            return;
+        }
+
+        try {
+            $emoji = $isError ? '❌' : '✅';
+            $fullMessage = "{$emoji} <b>Публикация в {$this->getSocialNetworkName()}</b>%0A%0A{$message}";
+
+            $client = new Client();
+            $response = $client->createRequest()
+                ->setMethod('POST')
+                ->setUrl("https://api.telegram.org/bot" . Yii::$app->params['telegramDeveloperBotToken'] . "/sendMessage")
+                ->setData([
+                    'chat_id' => Yii::$app->params['telegramDeveloperChatId'],
+                    'text' => $fullMessage,
+                    'parse_mode' => 'HTML'
+                ])
+                ->send();
+
+            if (!$response->isOk) {
+                Yii::error("Не удалось отправить уведомление в Telegram: " . $response->data['description'] ?? 'Unknown error', 'jobs-social');
+            }
+
+        } catch (\Throwable $e) {
+            Yii::error("Ошибка отправки уведомления в Telegram: " . $e->getMessage(), 'jobs-social');
+        }
+    }
+
+    /**
+     * Отправляет уведомление об успешной публикации
+     *
+     * @param News $news
+     * @param int $uploadedImagesCount Количество загруженных изображений
+     * @param int $failedImagesCount Количество неудачных загрузок
+     *
+     * @return void
+     */
+    protected function sendSuccessNotification(News $news, int $uploadedImagesCount = 0, int $failedImagesCount = 0): void
+    {
+        $message = "<b>Новость:</b> {$news->title}%0A";
+        $message .= "<b>ID:</b> {$this->news_id}%0A";
+        $message .= "<b>Изображений:</b> загружено {$uploadedImagesCount}";
+
+        if ($failedImagesCount > 0) {
+            $message .= " (ошибок: {$failedImagesCount}) ⚠️";
+        }
+
+        $message .= "%0A%0A🔗 <a href=\"https://t.me/{$news->slug}\">Открыть новость</a>";
+
+        $this->sendTelegramNotification($message, false);
+    }
+
+    /**
+     * Отправляет уведомление об ошибке публикации
+     *
+     * @param News $news|null
+     * @param string $errorMessage Текст ошибки
+     *
+     * @return void
+     */
+    protected function sendErrorNotification(?News $news, string $errorMessage): void
+    {
+        $message = "<b>Новость ID:</b> {$this->news_id}%0A";
+
+        if ($news) {
+            $message .= "<b>Заголовок:</b> {$news->title}%0A";
+        }
+
+        $message .= "<b>Ошибка:</b>%0A<code>" . htmlspecialchars($errorMessage) . "</code>%0A%0A";
+        $message .= "🔗 <a href=\"https://soyzchernobilkurgan.local/admin/news/update?id={$this->news_id}\">Редактировать новость</a>";
+
+        $this->sendTelegramNotification($message, true);
     }
 }

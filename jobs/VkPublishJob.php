@@ -41,13 +41,13 @@ class VkPublishJob extends SocialPublishJob
     /**
      * @inheritdoc
      */
-    protected function publish(Client $client, News $news): bool
+    protected function publish(Client $client, News $news, int &$uploadedImagesCount = 0, int &$failedImagesCount = 0): bool
     {
         $message = $this->prepareMessage($news);
         $images = $this->getImages($news);
 
         // Загружаем картинки с отказоустойчивостью
-        $uploadedImages = $this->uploadImagesWithFallback($client, $images);
+        $uploadedImages = $this->uploadImagesWithFallback($client, $images, $uploadedImagesCount, $failedImagesCount);
 
         // Если картинки не загрузились — публикуем только текст
         $attachments = !empty($uploadedImages) ? implode(',', $uploadedImages) : '';
@@ -110,12 +110,14 @@ class VkPublishJob extends SocialPublishJob
      *
      * @param Client $client
      * @param array $images
+     * @param int &$uploadedCount Счётчик загруженных изображений (выходной параметр)
+     * @param int &$failedCount Счётчик неудачных загрузок (выходной параметр)
+     *
      * @return array
      */
-    private function uploadImagesWithFallback(Client $client, array $images): array
+    private function uploadImagesWithFallback(Client $client, array $images, int &$uploadedCount = 0, int &$failedCount = 0): array
     {
         $uploadedImages = [];
-        $failedCount = 0;
 
         foreach ($images as $index => $imagePath) {
             // Проверяем существование файла
@@ -130,6 +132,7 @@ class VkPublishJob extends SocialPublishJob
 
                 if ($uploadedImage !== null) {
                     $uploadedImages[] = $uploadedImage;
+                    $uploadedCount++;
                     Yii::info("Картинка {$index} загружена: {$uploadedImage}", 'jobs-vk');
                 } else {
                     Yii::warning("Не удалось загрузить картинку {$index}: {$imagePath}", 'jobs-vk');
@@ -145,7 +148,7 @@ class VkPublishJob extends SocialPublishJob
 
         if ($failedCount > 0) {
             Yii::warning(
-                "Загружено " . count($uploadedImages) . " из " . count($images) .
+                "Загружено {$uploadedCount} из " . count($images) .
                 " картинок (ошибок: {$failedCount})",
                 'jobs-vk'
             );

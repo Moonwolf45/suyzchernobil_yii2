@@ -35,13 +35,13 @@ class OkPublishJob extends SocialPublishJob
     /**
      * @inheritdoc
      */
-    protected function publish(Client $client, News $news): bool
+    protected function publish(Client $client, News $news, int &$uploadedImagesCount = 0, int &$failedImagesCount = 0): bool
     {
         $message = $this->prepareMessage($news);
         $images = $this->getImages($news);
 
         // Загружаем картинки с отказоустойчивостью
-        $uploadedImages = $this->uploadImagesWithFallback($client, $images);
+        $uploadedImages = $this->uploadImagesWithFallback($client, $images, $uploadedImagesCount, $failedImagesCount);
 
         // Формируем attachment
         $attachment = [
@@ -118,20 +118,20 @@ class OkPublishJob extends SocialPublishJob
      *
      * @param Client $client
      * @param array $images
+     * @param int &$uploadedCount Счётчик загруженных изображений (выходной параметр)
+     * @param int &$failedCount Счётчик неудачных загрузок (выходной параметр)
      *
      * @return array
      */
-    private function uploadImagesWithFallback(Client $client, array $images): array
+    private function uploadImagesWithFallback(Client $client, array $images, int &$uploadedCount = 0, int &$failedCount = 0): array
     {
         $uploadedImages = [];
-        $failedCount = 0;
 
         foreach ($images as $index => $imagePath) {
             // Проверяем существование файла
             if (!$this->imageExists($imagePath)) {
                 Yii::warning("Файл изображения не найден: {$imagePath}", 'jobs-ok');
                 $failedCount++;
-
                 continue;
             }
 
@@ -140,6 +140,7 @@ class OkPublishJob extends SocialPublishJob
 
                 if ($uploadedImage !== null) {
                     $uploadedImages[] = $uploadedImage;
+                    $uploadedCount++;
                     Yii::info("Картинка {$index} загружена", 'jobs-ok');
                 } else {
                     Yii::warning("Не удалось загрузить картинку {$index}: {$imagePath}", 'jobs-ok');
@@ -155,7 +156,7 @@ class OkPublishJob extends SocialPublishJob
 
         if ($failedCount > 0) {
             Yii::warning(
-                "Загружено " . count($uploadedImages) . " из " . count($images) .
+                "Загружено {$uploadedCount} из " . count($images) .
                 " картинок (ошибок: {$failedCount})",
                 'jobs-ok'
             );
