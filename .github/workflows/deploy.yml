@@ -65,7 +65,7 @@ jobs:
       - name: Deploy via SSH/rsync
         uses: burnett01/rsync-deployments@7.0.1
         with:
-          switches: -avzt --no-times --no-perms --no-owner --no-group --exclude='.git/' --exclude='tests/' --exclude='docs/' --exclude='vagrant/' --exclude='.env.example' --exclude='.github/' --exclude='runtime/cache/' --exclude='runtime/logs/' --exclude='web/assets/' --exclude='.env' --exclude='composer.lock'
+          switches: -avzt --no-times --no-perms --no-owner --no-group --exclude='.git/' --exclude='tests/' --exclude='docs/' --exclude='vagrant/' --exclude='.env.example' --exclude='.github/' --exclude='runtime/cache/' --exclude='runtime/logs/' --exclude='web/assets/' --exclude='.env'
           path: ./
           remote_path: ${{ secrets.SERVER_PATH }}
           remote_host: ${{ secrets.SERVER_HOST }}
