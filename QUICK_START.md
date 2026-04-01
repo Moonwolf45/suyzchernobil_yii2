@@ -6,9 +6,8 @@
 
 ```bash
 cd D:\OSPanel\home\soyzchernobilkurgan.local
-git init
 git add .
-git commit -m "Initial commit"
+git commit -m "Update dependencies and add CI/CD"
 ```
 
 ### 2️⃣ Создание репозитория на GitHub
