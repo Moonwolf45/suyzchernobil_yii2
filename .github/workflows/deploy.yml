@@ -59,18 +59,34 @@ jobs:
           rm -rf web/assets/*
 
       # ============================================
+      # ПОДГОТОВКА: Создаём необходимые директории на сервере
+      # ============================================
+      - name: Prepare remote directories
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: -avz --include='runtime/' --include='runtime/logs/' --include='runtime/cache/' --include='web/assets/' --exclude='*'
+          path: ./
+          remote_path: ${{ secrets.SERVER_PATH }}
+          remote_host: ${{ secrets.SERVER_HOST }}
+          remote_user: ${{ secrets.SERVER_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          remote_port: ${{ secrets.SERVER_PORT }}
+
+      # ============================================
       # ВАРИАНТ 1: Деплой через rsync + SSH (рекомендуется)
       # Раскомментируйте, если используете SSH
       # ============================================
       - name: Deploy via SSH/rsync
         uses: burnett01/rsync-deployments@7.0.1
         with:
-          switches: -avzr --exclude='.git' --exclude='tests' --exclude='docs' --exclude='vagrant' --exclude='.env.example' --exclude='.github' --exclude='runtime/' --exclude='web/assets/' --exclude='.env' --exclude='composer.lock'
+          switches: -avz --exclude='.git/' --exclude='tests/' --exclude='docs/' --exclude='vagrant/' --exclude='.env.example' --exclude='.github/' --exclude='runtime/cache/' --exclude='runtime/logs/' --exclude='web/assets/' --exclude='.env' --exclude='composer.lock'
           path: ./
           remote_path: ${{ secrets.SERVER_PATH }}
           remote_host: ${{ secrets.SERVER_HOST }}
           remote_user: ${{ secrets.SERVER_USER }}
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          remote_port: ${{ secrets.SERVER_PORT }}
+          remote_path_is_relative: false
 
       # ============================================
       # ВАРИАНТ 2: Деплой через SSH (альтернативный)
@@ -84,8 +100,8 @@ jobs:
       #     REMOTE_USER: ${{ secrets.SERVER_USER }}
       #     REMOTE_PORT: ${{ secrets.SERVER_PORT }}
       #     TARGET: ${{ secrets.SERVER_PATH }}
-      #     EXCLUDE: "/.git/, /tests/, /docs/, /vagrant/, /.env.example, /.github/, /runtime/, /web/assets/, /.env"
-      #     ARGS: "-rltgoDzvO --delete-excluded"
+      #     EXCLUDE: "/.git/, /tests/, /docs/, /vagrant/, /.env.example, /.github/, /runtime/cache/, /runtime/logs/, /web/assets/, /.env"
+      #     ARGS: "-rltgoDzvO"
       #     SCRIPT_AFTER: |
       #       chmod -R 0777 ${{ secrets.SERVER_PATH }}/runtime
       #       chmod -R 0777 ${{ secrets.SERVER_PATH }}/web/assets
