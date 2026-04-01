@@ -209,12 +209,7 @@ Yii::$app->queue->push(new OkPublishJob(['news_id' => $id]));
 // В config/console.php
 'queue' => [
     'class' => \yii\queue\file\Queue::class,
-    'as log' => \yii\queue\LogBehavior::class,
-    'handleAttempt' => function($event) {
-        if ($event->attempt >= 3) {
-            // Отправить уведомление администратору
-        }
-    },
+    'as log' => \yii\queue\LogBehavior::class
 ],
 ```
 

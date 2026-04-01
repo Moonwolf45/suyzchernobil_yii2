@@ -24,12 +24,7 @@ $config = [
             'channel' => 'default',
             'mutex' => \yii\mutex\MysqlMutex::class,
             'attempts' => 5,
-            'as log' => \yii\queue\LogBehavior::class,
-                'handleAttempt' => function($event) {
-                if ($event->attempt >= 5) {
-                    // Отправить уведомление администратору
-                }
-            },
+            'as log' => \yii\queue\LogBehavior::class
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -57,6 +52,12 @@ $config = [
                         . '-jobs-ok.log',
                     'levels' => ['error', 'warning', 'info'],
                     'categories' => ['jobs-ok'],
+                ], [
+                    'class' => 'yii\log\FileTarget',
+                    'logFile' => '@runtime/logs/' . date('Y') . '/' . date('m') . '/' . date('d')
+                        . '-jobs-social.log',
+                    'levels' => ['error', 'warning', 'info'],
+                    'categories' => ['jobs-social'],
                 ],
             ],
         ],
