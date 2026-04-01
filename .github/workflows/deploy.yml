@@ -65,7 +65,7 @@ jobs:
       - name: Deploy via SSH/rsync
         uses: burnett01/rsync-deployments@7.0.1
         with:
-          switches: -avzr --delete --exclude='.git' --exclude='tests' --exclude='docs' --exclude='vagrant' --exclude='.env.example'
+          switches: -avzr --exclude='.git' --exclude='tests' --exclude='docs' --exclude='vagrant' --exclude='.env.example' --exclude='.github' --exclude='runtime/' --exclude='web/assets/' --exclude='.env' --exclude='composer.lock'
           path: ./
           remote_path: ${{ secrets.SERVER_PATH }}
           remote_host: ${{ secrets.SERVER_HOST }}
@@ -84,8 +84,8 @@ jobs:
       #     REMOTE_USER: ${{ secrets.SERVER_USER }}
       #     REMOTE_PORT: ${{ secrets.SERVER_PORT }}
       #     TARGET: ${{ secrets.SERVER_PATH }}
-      #     EXCLUDE: "/.git/, /tests/, /docs/, /vagrant/, /.env.example"
-      #     ARGS: "-rltgoDzvO"
+      #     EXCLUDE: "/.git/, /tests/, /docs/, /vagrant/, /.env.example, /.github/, /runtime/, /web/assets/, /.env"
+      #     ARGS: "-rltgoDzvO --delete-excluded"
       #     SCRIPT_AFTER: |
       #       chmod -R 0777 ${{ secrets.SERVER_PATH }}/runtime
       #       chmod -R 0777 ${{ secrets.SERVER_PATH }}/web/assets
