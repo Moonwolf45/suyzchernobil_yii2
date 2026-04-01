@@ -29,7 +29,8 @@ class Alert extends Widget {
 
     public $key;
 
-    public function init() {
+    public function init(): void
+    {
         parent::init();
     }
 
