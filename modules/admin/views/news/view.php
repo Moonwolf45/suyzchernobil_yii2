@@ -26,12 +26,12 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             ],
         ]); ?>
 
-        <?= Html::a('<i class="fa fa-upload"></i><i class="fa fa-vk"></i>', ['retry-vk-publish', 'id' => $model->id], [
+        <?= Html::a('<i class="fa fa-upload"></i> <i class="fa fa-vk"></i>', ['retry-vk-publish', 'id' => $model->id], [
                 'title' => 'Публиковать в Vk',
                 'class' => 'btn btn-primary'
         ]); ?>
 
-        <?= Html::a('<i class="fa fa-upload"></i><i class="fa fa-odnoklassniki"></i>', ['retry-ok-publish', 'id' => $model->id], [
+        <?= Html::a('<i class="fa fa-upload"></i> <i class="fa fa-odnoklassniki"></i>', ['retry-ok-publish', 'id' => $model->id], [
                 'title' => 'Публиковать в OK',
                 'class' => 'btn btn-primary'
         ]); ?>
