@@ -39,7 +39,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer install --prefer-dist --optimize-autoloader
+#          composer install --prefer-dist --optimize-autoloader
+          composer update
 
       - name: Проверка синтаксиса PHP (lint)
         run: |
