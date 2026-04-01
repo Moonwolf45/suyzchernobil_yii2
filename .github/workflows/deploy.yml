@@ -1,0 +1,127 @@
+# GitHub Actions CI/CD для Yii2 проекта
+# Без тестов - только линтинг, сборка и деплой
+
+name: Yii2 Deploy
+
+on:
+  push:
+    branches: [ main, master ]
+  # Ручной запуск
+  workflow_dispatch:
+
+env:
+  PHP_VERSION: '8.1'
+  COMPOSER_VERSION: '2'
+
+jobs:
+  # ============================================
+  # СБОРКА И ДЕПЛОЙ
+  # ============================================
+  deploy:
+    name: 🚀 Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, gd, curl, imagick, pdo_mysql
+          tools: composer:v${{ env.COMPOSER_VERSION }}
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader --no-dev
+
+      - name: Проверка синтаксиса PHP (lint)
+        run: |
+          echo "Проверка синтаксиса PHP файлов..."
+          find . -name "*.php" -not -path "./vendor/*" -not -path "./runtime/*" -not -path "./web/assets/*" | xargs -n1 -P4 php -l
+          echo "✅ Все файлы прошли проверку"
+
+      - name: Настройка прав доступа
+        run: |
+          mkdir -p runtime runtime/logs runtime/cache
+          chmod -R 0777 runtime
+          chmod -R 0777 web/assets
+
+      - name: Очистка кеша
+        run: |
+          rm -rf runtime/cache/*
+          rm -rf web/assets/*
+
+      # ============================================
+      # ВАРИАНТ 1: Деплой через rsync + SSH (рекомендуется)
+      # Раскомментируйте, если используете SSH
+      # ============================================
+      - name: Deploy via SSH/rsync
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: -avzr --delete --exclude='.git' --exclude='tests' --exclude='docs' --exclude='vagrant' --exclude='.env.example'
+          path: ./
+          remote_path: ${{ secrets.SERVER_PATH }}
+          remote_host: ${{ secrets.SERVER_HOST }}
+          remote_user: ${{ secrets.SERVER_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # ============================================
+      # ВАРИАНТ 2: Деплой через SSH (альтернативный)
+      # Раскомментируйте, если используете SSH
+      # ============================================
+      # - name: Deploy via SSH
+      #   uses: easingthemes/ssh-deploy@v4
+      #   with:
+      #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     REMOTE_HOST: ${{ secrets.SERVER_HOST }}
+      #     REMOTE_USER: ${{ secrets.SERVER_USER }}
+      #     REMOTE_PORT: ${{ secrets.SERVER_PORT }}
+      #     TARGET: ${{ secrets.SERVER_PATH }}
+      #     EXCLUDE: "/.git/, /tests/, /docs/, /vagrant/, /.env.example"
+      #     ARGS: "-rltgoDzvO"
+      #     SCRIPT_AFTER: |
+      #       chmod -R 0777 ${{ secrets.SERVER_PATH }}/runtime
+      #       chmod -R 0777 ${{ secrets.SERVER_PATH }}/web/assets
+      #       cd ${{ secrets.SERVER_PATH }} && php yii migrate --interactive=0
+
+      # ============================================
+      # ВАРИАНТ 3: Деплой через FTP
+      # Раскомментируйте, если используете FTP
+      # ============================================
+      # - name: Deploy via FTP
+      #   uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      #   with:
+      #     server: ${{ secrets.FTP_SERVER }}
+      #     username: ${{ secrets.FTP_USERNAME }}
+      #     password: ${{ secrets.FTP_PASSWORD }}
+      #     port: ${{ secrets.FTP_PORT }}
+      #     exclude: |
+      #       **/.git*
+      #       **/.git*/**
+      #       **/tests/**
+      #       **/docs/**
+      #       **/vagrant/**
+      #       **/.env.example
+      #       **/.github/**
+
+      # ============================================
+      # Уведомление в Telegram
+      # ============================================
+      - name: Send Telegram notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            MESSAGE="✅ Деплой успешен!%0A📦 Commit: ${{ github.sha }}%0A👤 Автор: ${{ github.actor }}%0A🔗 https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+          else
+            MESSAGE="❌ Деплой провалился!%0A📦 Commit: ${{ github.sha }}%0A👤 Автор: ${{ github.actor }}%0A🔗 https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi
+          
+          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}&text=$MESSAGE&parse_mode=html"
+        continue-on-error: true
