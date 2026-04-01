@@ -59,27 +59,13 @@ jobs:
           rm -rf web/assets/*
 
       # ============================================
-      # ПОДГОТОВКА: Создаём необходимые директории на сервере
-      # ============================================
-      - name: Prepare remote directories
-        uses: burnett01/rsync-deployments@7.0.1
-        with:
-          switches: -avz --include='runtime/' --include='runtime/logs/' --include='runtime/cache/' --include='web/assets/' --exclude='*'
-          path: ./
-          remote_path: ${{ secrets.SERVER_PATH }}
-          remote_host: ${{ secrets.SERVER_HOST }}
-          remote_user: ${{ secrets.SERVER_USER }}
-          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          remote_port: ${{ secrets.SERVER_PORT }}
-
-      # ============================================
       # ВАРИАНТ 1: Деплой через rsync + SSH (рекомендуется)
       # Раскомментируйте, если используете SSH
       # ============================================
       - name: Deploy via SSH/rsync
         uses: burnett01/rsync-deployments@7.0.1
         with:
-          switches: -avz --exclude='.git/' --exclude='tests/' --exclude='docs/' --exclude='vagrant/' --exclude='.env.example' --exclude='.github/' --exclude='runtime/cache/' --exclude='runtime/logs/' --exclude='web/assets/' --exclude='.env' --exclude='composer.lock'
+          switches: -avzt --no-times --no-perms --no-owner --no-group --exclude='.git/' --exclude='tests/' --exclude='docs/' --exclude='vagrant/' --exclude='.env.example' --exclude='.github/' --exclude='runtime/cache/' --exclude='runtime/logs/' --exclude='web/assets/' --exclude='.env' --exclude='composer.lock'
           path: ./
           remote_path: ${{ secrets.SERVER_PATH }}
           remote_host: ${{ secrets.SERVER_HOST }}
