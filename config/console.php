@@ -17,6 +17,10 @@ $config = [
         '@tests' => '@app/tests',
     ],
     'components' => [
+        'httpClient' => [
+            'class' => 'yii\httpclient\Client',
+            'transport' => 'yii\httpclient\CurlTransport',
+        ],
         'queue' => [
             'class' => \yii\queue\db\Queue::class,
             'db' => $db,

@@ -62,12 +62,14 @@ class OkPublishJob extends SocialPublishJob
         try {
             $response = $this->executeWithRetry(function () use ($client, $attachmentJson) {
                 return $client->createRequest()
-                    ->setMethod('POST')
-                    ->setUrl('https://api.ok.ru/api/mediatopic.post')
+                    ->setMethod('GET')
+                    ->setUrl('https://api.ok.ru/fb.do')
                     ->setData([
                         'application_key' => Yii::$app->params['OkAppPublicKey'],
                         'attachment' => $attachmentJson,
+                        'format' => 'json',
                         'gid' => Yii::$app->params['OkGroupId'],
+                        'method' => 'mediatopic.post',
                         'type' => 'GROUP_THEME',
                         'sig' => $this->calculateSignature($attachmentJson),
                         'access_token' => Yii::$app->params['OkApiKey']
@@ -172,6 +174,7 @@ class OkPublishJob extends SocialPublishJob
      * @param Client $client
      * @param string $imagePath
      * @param int $index
+     *
      * @return array|null Токен загруженного изображения или null
      */
     private function uploadSingleImageOk(Client $client, string $imagePath, int $index): ?array
@@ -187,25 +190,26 @@ class OkPublishJob extends SocialPublishJob
 
         // Шаг 2: Загружаем изображение
         $fullPath = Yii::getAlias('@app/web/' . $imagePath);
-        $fileHandle = fopen($fullPath, 'r');
 
-        if ($fileHandle === false) {
-            Yii::error("Не удалось открыть файл для загрузки (image {$index}): {$fullPath}", 'jobs-ok');
-
+        if (!file_exists($fullPath) || !is_readable($fullPath)) {
+            Yii::error("Файл не существует или не читаем (image {$index}): {$fullPath}", 'jobs-ok');
             return null;
         }
 
-        try {
-            $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $fileHandle) {
-                return $client->createRequest()
-                    ->setMethod('POST')
-                    ->setUrl($uploadUrl)
-                    ->addFile('pic1', $fileHandle)
-                    ->send();
-            }, "photo upload (image {$index})");
-        } finally {
-            fclose($fileHandle);
-        }
+        $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $fullPath, $index) {
+            $fileContent = file_get_contents($fullPath);
+
+            if ($fileContent === false) {
+                Yii::error("Не удалось прочитать содержимое файла (image {$index}): {$fullPath}", 'jobs-ok');
+                return null;
+            }
+
+            return $client->createRequest()
+                ->setMethod('POST')
+                ->setUrl($uploadUrl)
+                ->addFileContent('pic1', $fileContent)
+                ->send();
+        }, "photo upload (image {$index})");
 
         if (!$uploadResponse || !$uploadResponse->isOk) {
             Yii::error("Не удалось загрузить фото на сервер (image {$index})", 'jobs-ok');
@@ -248,7 +252,7 @@ class OkPublishJob extends SocialPublishJob
             'gid=' . Yii::$app->params['OkGroupId'] .
             'method=mediatopic.post' .
             'type=GROUP_THEME' .
-            Yii::$app->params['OkAppSecretKey']
+            md5(Yii::$app->params['OkApiKey'] . Yii::$app->params['OkAppSecretKey'])
         );
     }
 
@@ -261,30 +265,32 @@ class OkPublishJob extends SocialPublishJob
     private function getOkUploadUrl(Client $client): string
     {
         // Проверяем кеш
-        if (self::$uploadUrlCache !== null) {
-            return self::$uploadUrlCache;
-        }
+//        if (self::$uploadUrlCache !== null) {
+//            return self::$uploadUrlCache;
+//        }
 
         $method = 'photosV2.getUploadUrl';
         $sig = md5(
             'application_key=' . Yii::$app->params['OkAppPublicKey'] .
+            'count=1' .
             'format=json' .
             'gid=' . Yii::$app->params['OkGroupId'] .
             'method=' . $method .
-            Yii::$app->params['OkAppSecretKey']
+            md5(Yii::$app->params['OkApiKey'] . Yii::$app->params['OkAppSecretKey'])
         );
 
         $response = $this->executeWithRetry(function () use ($client, $method, $sig) {
             return $client->createRequest()
-                ->setMethod('POST')
-                ->setUrl('https://api.ok.ru/api/' . $method)
+                ->setMethod('GET')
+                ->setUrl('https://api.ok.ru/fb.do')
                 ->setData([
-                    'count' => 1,
                     'application_key' => Yii::$app->params['OkAppPublicKey'],
-                    'access_token' => Yii::$app->params['OkApiKey'],
+                    'count' => 1,
+                    'format' => 'json',
                     'gid' => Yii::$app->params['OkGroupId'],
                     'method' => $method,
-                    'sig' => $sig
+                    'sig' => $sig,
+                    'access_token' => Yii::$app->params['OkApiKey']
                 ])
                 ->send();
         }, 'photosV2.getUploadUrl');
@@ -307,11 +313,11 @@ class OkPublishJob extends SocialPublishJob
 
         $uploadUrl = $response->data['upload_url'] ?? null;
 
-        if ($uploadUrl) {
-            self::$uploadUrlCache = $uploadUrl;
-        } else {
-            Yii::error("getUploadUrl: upload_url not found in response: " . json_encode($response->data), 'jobs-ok');
-        }
+//        if ($uploadUrl) {
+//            self::$uploadUrlCache = $uploadUrl;
+//        } else {
+//            Yii::error("getUploadUrl: upload_url not found in response: " . json_encode($response->data), 'jobs-ok');
+//        }
 
         return $uploadUrl ?? '';
     }

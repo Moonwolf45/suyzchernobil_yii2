@@ -7,6 +7,7 @@ use Yii;
 use yii\base\BaseObject;
 use yii\helpers\Url;
 use yii\httpclient\Client;
+use yii\httpclient\CurlTransport;
 use yii\queue\JobInterface;
 
 /**
@@ -76,7 +77,7 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
                 return;
             }
 
-            $client = new Client();
+            $client = new Client(['transport' => new CurlTransport()]);
 
             $published = $this->publish($client, $news, $uploadedImagesCount, $failedImagesCount);
 

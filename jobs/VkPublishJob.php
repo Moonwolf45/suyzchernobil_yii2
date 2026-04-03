@@ -181,25 +181,28 @@ class VkPublishJob extends SocialPublishJob
 
         // Шаг 2: Загружаем изображение
         $fullPath = Yii::getAlias('@app/web/' . $imagePath);
-        $fileHandle = fopen($fullPath, 'r');
 
-        if ($fileHandle === false) {
-            Yii::error("Не удалось открыть файл для загрузки (image {$index}): {$fullPath}", 'jobs-vk');
+        if (!file_exists($fullPath) || !is_readable($fullPath)) {
+            Yii::error("Файл не существует или не читаем (image {$index}): {$fullPath}", 'jobs-vk');
 
             return null;
         }
 
-        try {
-            $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $fileHandle) {
-                return $client->createRequest()
-                    ->setMethod('POST')
-                    ->setUrl($uploadUrl)
-                    ->addFile('photo', $fileHandle)
-                    ->send();
-            }, "photo upload (image {$index})");
-        } finally {
-            fclose($fileHandle);
-        }
+        $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $fullPath, $index) {
+            $fileContent = file_get_contents($fullPath);
+
+            if ($fileContent === false) {
+                Yii::error("Не удалось прочитать содержимое файла (image {$index}): {$fullPath}", 'jobs-vk');
+
+                return null;
+            }
+
+            return $client->createRequest()
+                ->setMethod('POST')
+                ->setUrl($uploadUrl)
+                ->addFileContent('photo', $fileContent)
+                ->send();
+        }, "photo upload (image {$index})");
 
         if (!$uploadResponse || !$uploadResponse->isOk) {
             Yii::error("Не удалось загрузить фото на сервер (image {$index})", 'jobs-vk');

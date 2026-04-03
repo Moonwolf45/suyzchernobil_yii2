@@ -22,6 +22,10 @@ $config = [
         \yii\helpers\Inflector::$transliterator = 'Russian-Latin/BGN; Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC; [:Punctuation:] Remove; Lower();';
     },
     'components' => [
+        'httpClient' => [
+            'class' => 'yii\httpclient\Client',
+            'transport' => 'yii\httpclient\CurlTransport',
+        ],
         'reCaptcha' => [
             'class' => 'himiklab\yii2\recaptcha\ReCaptchaConfig',
             'siteKeyV2' => $params['siteKeyV2'],
