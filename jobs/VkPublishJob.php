@@ -4,6 +4,7 @@ namespace app\jobs;
 
 
 use app\models\News;
+use CURLFile;
 use Yii;
 use yii\httpclient\Client;
 
@@ -185,7 +186,7 @@ class VkPublishJob extends SocialPublishJob
             return null;
         }
 
-        $fullPath = Yii::getAlias('@app/web/' . $imagePath);
+        $fullPath = Yii::getAlias('@web/' . $imagePath);
         if (!file_exists($fullPath) || !is_readable($fullPath)) {
             Yii::error("Файл не существует или не читаем (image {$index}): {$fullPath}", 'jobs-vk');
 
@@ -196,13 +197,9 @@ class VkPublishJob extends SocialPublishJob
             $request = $client->createRequest()
                 ->setMethod('POST')
                 ->setUrl($uploadUrl)
-                ->addFile('photo', $fullPath)
+                ->addFile('photo', new \CurlFile($fullPath))
                 ->addHeaders([
                     'Content-Type' => 'multipart/form-data; charset=UTF-8',
-                ])
-                ->setOptions([
-                    'CURLOPT_TIMEOUT' => 5,
-                    'CURLOPT_RETURNTRANSFER' => true
                 ]);
 
             Yii::info("REQUEST [photo upload]: POST {$uploadUrl}", 'jobs-vk');

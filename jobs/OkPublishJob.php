@@ -90,6 +90,7 @@ class OkPublishJob extends SocialPublishJob
                 return $resp;
             }, 'mediatopic.post');
 
+            Yii::info('mediatopic.post: ' . (string)$response->data, 'jobs-ok');
             if ($response && $response->isOk) {
                 $hasError = array_key_exists('error_code', (array) $response->data);
 
@@ -202,7 +203,7 @@ class OkPublishJob extends SocialPublishJob
         }
 
         // Шаг 2: Загружаем изображение
-        $fullPath = Yii::getAlias('@app/web/' . $imagePath);
+        $fullPath = Yii::getAlias('@web/' . $imagePath);
 
         if (!file_exists($fullPath) || !is_readable($fullPath)) {
             Yii::error("Файл не существует или не читаем (image {$index}): {$fullPath}", 'jobs-ok');
