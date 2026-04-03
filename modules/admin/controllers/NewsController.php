@@ -317,7 +317,7 @@ class NewsController extends Controller {
         return $this->redirect(['index']);
     }
 
-    public function retryVkPublish(int $id): Response {
+    public function actionRetryVkPublish(int $id): Response {
         Yii::$app->queue->push(new VkPublishJob(['news_id' => $id]));
 
         Yii::$app->session->setFlash('news', [['result' => 'success', 'value' => 'Новость поставлена в очередь на публикацию, 
@@ -326,7 +326,7 @@ class NewsController extends Controller {
         return $this->redirect(['index']);
     }
 
-    public function retryOkPublish(int $id): Response {
+    public function actionRetryOkPublish(int $id): Response {
         Yii::$app->queue->push(new OkPublishJob(['news_id' => $id]));
 
         Yii::$app->session->setFlash('news', [['result' => 'success', 'value' => 'Новость поставлена в очередь на публикацию, 
