@@ -196,13 +196,20 @@ class VkPublishJob extends SocialPublishJob
             $request = $client->createRequest()
                 ->setMethod('POST')
                 ->setUrl($uploadUrl)
-                ->addFile('photo', '@' . $fullPath);
+                ->addFile('photo', $fullPath)
+                ->addHeaders([
+                    'Content-Type' => 'multipart/form-data; charset=UTF-8',
+                ])
+                ->setOptions([
+                    'CURLOPT_TIMEOUT' => 5,
+                    'CURLOPT_RETURNTRANSFER' => true
+                ]);
 
             Yii::info("REQUEST [photo upload]: POST {$uploadUrl}", 'jobs-vk');
+            Yii::info("REQUEST [photo upload]: POST photo: {$fullPath}", 'jobs-vk');
 
             $response = $request->send();
 
-            Yii::info("REQUEST [photo upload]: POST {$request->getFullUrl()}", 'jobs-vk');
             Yii::info("RESPONSE [photo upload]: " . json_encode($response->data), 'jobs-vk');
 
             return $response;
