@@ -59,9 +59,24 @@ class OkPublishJob extends SocialPublishJob
 
         $attachmentJson = json_encode($attachment);
 
+        $params = [
+            'application_key' => Yii::$app->params['OkAppPublicKey'],
+            'attachment' => $attachmentJson,
+            'format' => 'json',
+            'gid' => Yii::$app->params['OkGroupId'],
+            'method' => 'mediatopic.post',
+            'type' => 'GROUP_THEME'
+        ];
+
+        ksort($params);
+        $sig_string = '';
+        foreach ($params as $k => $v) {
+            $sig_string .= $k . '=' . $v;
+        }
+
         try {
-            $response = $this->executeWithRetry(function () use ($client, $attachmentJson) {
-                return $client->createRequest()
+            $response = $this->executeWithRetry(function () use ($client, $attachmentJson, $sig_string) {
+                $request = $client->createRequest()
                     ->setMethod('GET')
                     ->setUrl('https://api.ok.ru/fb.do')
                     ->setData([
@@ -71,10 +86,16 @@ class OkPublishJob extends SocialPublishJob
                         'gid' => Yii::$app->params['OkGroupId'],
                         'method' => 'mediatopic.post',
                         'type' => 'GROUP_THEME',
-                        'sig' => $this->calculateSignature($attachmentJson),
+                        'sig' => $this->calculateSignature($sig_string),
                         'access_token' => Yii::$app->params['OkApiKey']
-                    ])
-                    ->send();
+                    ]);
+
+                Yii::info("REQUEST [mediatopic.post]: GET {$request->getFullUrl()}", 'jobs-ok');
+                Yii::info("REQUEST [mediatopic.post]: GET https://api.ok.ru/fb.do", 'jobs-ok');
+                $resp = $request->send();
+                Yii::info("RESPONSE [mediatopic.post]: " . json_encode($resp->data), 'jobs-ok');
+
+                return $resp;
             }, 'mediatopic.post');
 
             if ($response && $response->isOk) {
@@ -204,11 +225,16 @@ class OkPublishJob extends SocialPublishJob
                 return null;
             }
 
-            return $client->createRequest()
+            $request = $client->createRequest()
                 ->setMethod('POST')
                 ->setUrl($uploadUrl)
-                ->addFileContent('pic1', $fileContent)
-                ->send();
+                ->addFileContent('pic1', $fileContent);
+
+            Yii::info("REQUEST [photo upload] (image {$index}): POST {$uploadUrl}", 'jobs-ok');
+            $resp = $request->send();
+            Yii::info("RESPONSE [photo upload] (image {$index}): " . json_encode($resp->data), 'jobs-ok');
+
+            return $resp;
         }, "photo upload (image {$index})");
 
         if (!$uploadResponse || !$uploadResponse->isOk) {
@@ -240,20 +266,12 @@ class OkPublishJob extends SocialPublishJob
     /**
      * Вычисляет подпись для запроса к API Одноклассников
      *
-     * @param string $attachmentJson
+     * @param string $stringParams
      * @return string
      */
-    private function calculateSignature(string $attachmentJson): string
+    private function calculateSignature(string $stringParams): string
     {
-        return md5(
-            'application_key=' . Yii::$app->params['OkAppPublicKey'] .
-            'attachment=' . $attachmentJson .
-            'format=json' .
-            'gid=' . Yii::$app->params['OkGroupId'] .
-            'method=mediatopic.post' .
-            'type=GROUP_THEME' .
-            md5(Yii::$app->params['OkApiKey'] . Yii::$app->params['OkAppSecretKey'])
-        );
+        return md5($stringParams . md5(Yii::$app->params['OkApiKey'] . Yii::$app->params['OkAppSecretKey']));
     }
 
     /**
@@ -264,23 +282,26 @@ class OkPublishJob extends SocialPublishJob
      */
     private function getOkUploadUrl(Client $client): string
     {
-        // Проверяем кеш
-//        if (self::$uploadUrlCache !== null) {
-//            return self::$uploadUrlCache;
-//        }
 
         $method = 'photosV2.getUploadUrl';
-        $sig = md5(
-            'application_key=' . Yii::$app->params['OkAppPublicKey'] .
-            'count=1' .
-            'format=json' .
-            'gid=' . Yii::$app->params['OkGroupId'] .
-            'method=' . $method .
-            md5(Yii::$app->params['OkApiKey'] . Yii::$app->params['OkAppSecretKey'])
-        );
 
-        $response = $this->executeWithRetry(function () use ($client, $method, $sig) {
-            return $client->createRequest()
+        $params = [
+            'application_key' => Yii::$app->params['OkAppPublicKey'],
+            'count' => 1,
+            'format' => 'json',
+            'gid' => Yii::$app->params['OkGroupId'],
+            'method' => $method,
+            'access_token' => Yii::$app->params['OkApiKey']
+        ];
+
+        ksort($params);
+        $sig_string = '';
+        foreach ($params as $key => $value) {
+            $sig_string .= $key . '=' . $value;
+        }
+
+        $response = $this->executeWithRetry(function () use ($client, $method, $sig_string) {
+            $request = $client->createRequest()
                 ->setMethod('GET')
                 ->setUrl('https://api.ok.ru/fb.do')
                 ->setData([
@@ -289,10 +310,16 @@ class OkPublishJob extends SocialPublishJob
                     'format' => 'json',
                     'gid' => Yii::$app->params['OkGroupId'],
                     'method' => $method,
-                    'sig' => $sig,
+                    'sig' => $this->calculateSignature($sig_string),
                     'access_token' => Yii::$app->params['OkApiKey']
-                ])
-                ->send();
+                ]);
+
+            Yii::info("REQUEST [photosV2.getUploadUrl]: GET {$request->getFullUrl()}", 'jobs-ok');
+            Yii::info("REQUEST [photosV2.getUploadUrl]: GET https://api.ok.ru/fb.do", 'jobs-ok');
+            $resp = $request->send();
+            Yii::info("RESPONSE [photosV2.getUploadUrl]: " . json_encode($resp->data), 'jobs-ok');
+
+            return $resp;
         }, 'photosV2.getUploadUrl');
 
         if (!$response || !$response->isOk) {
@@ -312,12 +339,6 @@ class OkPublishJob extends SocialPublishJob
         }
 
         $uploadUrl = $response->data['upload_url'] ?? null;
-
-//        if ($uploadUrl) {
-//            self::$uploadUrlCache = $uploadUrl;
-//        } else {
-//            Yii::error("getUploadUrl: upload_url not found in response: " . json_encode($response->data), 'jobs-ok');
-//        }
 
         return $uploadUrl ?? '';
     }

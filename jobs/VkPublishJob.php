@@ -54,7 +54,7 @@ class VkPublishJob extends SocialPublishJob
 
         try {
             $response = $this->executeWithRetry(function () use ($client, $message, $attachments) {
-                return $client->createRequest()
+                $request = $client->createRequest()
                     ->setMethod('POST')
                     ->setUrl('https://api.vk.com/method/wall.post')
                     ->setData([
@@ -65,8 +65,13 @@ class VkPublishJob extends SocialPublishJob
                         'attachments' => $attachments,
                         'access_token' => Yii::$app->params['VkApiKey'],
                         'v' => self::VK_API_VERSION
-                    ])
-                    ->send();
+                    ]);
+
+                Yii::info("REQUEST [wall.post]: POST https://api.vk.com/method/wall.post", 'jobs-vk');
+                $resp = $request->send();
+                Yii::info("RESPONSE [wall.post]: " . json_encode($resp->data), 'jobs-vk');
+
+                return $resp;
             }, 'wall.post');
 
             if ($response && $response->isOk) {
@@ -197,11 +202,17 @@ class VkPublishJob extends SocialPublishJob
                 return null;
             }
 
-            return $client->createRequest()
+            $request = $client->createRequest()
                 ->setMethod('POST')
                 ->setUrl($uploadUrl)
-                ->addFileContent('photo', $fileContent)
-                ->send();
+                ->addFileContent('photo', $fileContent);
+
+            Yii::info("REQUEST [photo upload]: POST {$request->getFullUrl()}", 'jobs-vk');
+            Yii::info("REQUEST [photo upload]: POST {$uploadUrl}", 'jobs-vk');
+            $response = $request->send();
+            Yii::info("RESPONSE [photo upload]: " . json_encode($response->data), 'jobs-vk');
+
+            return $response;
         }, "photo upload (image {$index})");
 
         if (!$uploadResponse || !$uploadResponse->isOk) {
@@ -220,16 +231,16 @@ class VkPublishJob extends SocialPublishJob
         $server = $uploadResponse->data['server'] ?? null;
         $hash = $uploadResponse->data['hash'] ?? null;
 
-        if (empty($photo) || mb_strlen($photo) < 3) {
+        if (empty($photo)) {
             Yii::error("Некорректный photo параметр", 'jobs-vk');
 
             return null;
         }
 
         // Шаг 3: Сохраняем изображение
-        $saveResponse = $this->executeWithRetry(function () use ($client, $photo, $server, $hash) {
-            return $client->createRequest()
-                ->setMethod('GET')
+        $saveResponse = $this->executeWithRetry(function () use ($client, $photo, $server, $hash, $index) {
+            $request = $client->createRequest()
+                ->setMethod('POST')
                 ->setUrl('https://api.vk.com/method/photos.saveWallPhoto')
                 ->setData([
                     'photo' => $photo,
@@ -238,8 +249,13 @@ class VkPublishJob extends SocialPublishJob
                     'group_id' => Yii::$app->params['VkGroupId'],
                     'access_token' => Yii::$app->params['VkApiKey'],
                     'v' => self::VK_API_VERSION
-                ])
-                ->send();
+                ]);
+
+            Yii::info("REQUEST [photos.saveWallPhoto] (image {$index}): POST https://api.vk.com/method/photos.saveWallPhoto", 'jobs-vk');
+            $resp = $request->send();
+            Yii::info("RESPONSE [photos.saveWallPhoto] (image {$index}): " . json_encode($resp->data), 'jobs-vk');
+
+            return $resp;
         }, "photos.saveWallPhoto (image {$index})");
 
         if (!$saveResponse || !$saveResponse->isOk) {
