@@ -12,11 +12,6 @@ use yii\httpclient\Client;
 class OkPublishJob extends SocialPublishJob
 {
     /**
-     * @var string Кеш URL серверов загрузки
-     */
-    private static $uploadUrlCache = null;
-
-    /**
      * @inheritdoc
      */
     protected function getPublishedAtField(): string
@@ -75,24 +70,20 @@ class OkPublishJob extends SocialPublishJob
         }
 
         try {
-            $response = $this->executeWithRetry(function () use ($client, $attachmentJson, $sig_string) {
+            $response = $this->executeWithRetry(function () use ($client, $params, $sig_string) {
                 $request = $client->createRequest()
                     ->setMethod('GET')
                     ->setUrl('https://api.ok.ru/fb.do')
-                    ->setData([
-                        'application_key' => Yii::$app->params['OkAppPublicKey'],
-                        'attachment' => $attachmentJson,
-                        'format' => 'json',
-                        'gid' => Yii::$app->params['OkGroupId'],
-                        'method' => 'mediatopic.post',
-                        'type' => 'GROUP_THEME',
+                    ->setData(array_merge($params, [
                         'sig' => $this->calculateSignature($sig_string),
                         'access_token' => Yii::$app->params['OkApiKey']
-                    ]);
+                    ]));
+
+                Yii::info("REQUEST [mediatopic.post]: GET https://api.ok.ru/fb.do", 'jobs-ok');
+
+                $resp = $request->send();
 
                 Yii::info("REQUEST [mediatopic.post]: GET {$request->getFullUrl()}", 'jobs-ok');
-                Yii::info("REQUEST [mediatopic.post]: GET https://api.ok.ru/fb.do", 'jobs-ok');
-                $resp = $request->send();
                 Yii::info("RESPONSE [mediatopic.post]: " . json_encode($resp->data), 'jobs-ok');
 
                 return $resp;
@@ -218,20 +209,16 @@ class OkPublishJob extends SocialPublishJob
         }
 
         $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $fullPath, $index) {
-            $fileContent = file_get_contents($fullPath);
-
-            if ($fileContent === false) {
-                Yii::error("Не удалось прочитать содержимое файла (image {$index}): {$fullPath}", 'jobs-ok');
-                return null;
-            }
 
             $request = $client->createRequest()
                 ->setMethod('POST')
                 ->setUrl($uploadUrl)
-                ->addFileContent('pic1', $fileContent);
+                ->addFile('pic1', $fullPath);
 
             Yii::info("REQUEST [photo upload] (image {$index}): POST {$uploadUrl}", 'jobs-ok');
+
             $resp = $request->send();
+
             Yii::info("RESPONSE [photo upload] (image {$index}): " . json_encode($resp->data), 'jobs-ok');
 
             return $resp;
@@ -314,9 +301,11 @@ class OkPublishJob extends SocialPublishJob
                     'access_token' => Yii::$app->params['OkApiKey']
                 ]);
 
-            Yii::info("REQUEST [photosV2.getUploadUrl]: GET {$request->getFullUrl()}", 'jobs-ok');
             Yii::info("REQUEST [photosV2.getUploadUrl]: GET https://api.ok.ru/fb.do", 'jobs-ok');
+
             $resp = $request->send();
+
+            Yii::info("REQUEST [photosV2.getUploadUrl]: GET {$request->getFullUrl()}", 'jobs-ok');
             Yii::info("RESPONSE [photosV2.getUploadUrl]: " . json_encode($resp->data), 'jobs-ok');
 
             return $resp;
