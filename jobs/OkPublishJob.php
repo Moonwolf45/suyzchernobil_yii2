@@ -55,7 +55,7 @@ class OkPublishJob extends SocialPublishJob
         $attachmentJson = json_encode($attachment);
 
         $params = [
-            'application_key' => Yii::$app->params['OkAppPublicKey'],
+            'application_key' => Yii::$app->params['OkAppId'],
             'attachment' => $attachmentJson,
             'format' => 'json',
             'gid' => Yii::$app->params['OkGroupId'],
@@ -72,18 +72,19 @@ class OkPublishJob extends SocialPublishJob
         try {
             $response = $this->executeWithRetry(function () use ($client, $params, $sig_string) {
                 $request = $client->createRequest()
-                    ->setMethod('GET')
-                    ->setUrl('https://api.ok.ru/fb.do')
+                    ->setMethod('POST')
+                    ->setUrl('https://api.ok.ru/api/mediatopic/post')
                     ->setData(array_merge($params, [
+                        'application_key' => Yii::$app->params['OkAppPublicKey'],
                         'sig' => $this->calculateSignature($sig_string),
                         'access_token' => Yii::$app->params['OkApiKey']
                     ]));
 
-                Yii::info("REQUEST [mediatopic.post]: GET https://api.ok.ru/fb.do", 'jobs-ok');
+                Yii::info("REQUEST [mediatopic.post]: POST https://api.ok.ru/api/mediatopic/post", 'jobs-ok');
 
                 $resp = $request->send();
 
-                Yii::info("REQUEST [mediatopic.post]: GET {$request->getFullUrl()}", 'jobs-ok');
+                Yii::info("REQUEST [mediatopic.post]: POST {$request->getFullUrl()}", 'jobs-ok');
                 Yii::info("RESPONSE [mediatopic.post]: " . json_encode($resp->data), 'jobs-ok');
 
                 return $resp;
@@ -191,7 +192,7 @@ class OkPublishJob extends SocialPublishJob
      */
     private function uploadSingleImageOk(Client $client, string $imagePath, int $index): ?array
     {
-        // Получаем URL с кешированием
+        // Получаем URL
         $uploadUrl = $this->getOkUploadUrl($client);
         
         if (!$uploadUrl) {
@@ -258,7 +259,7 @@ class OkPublishJob extends SocialPublishJob
      */
     private function calculateSignature(string $stringParams): string
     {
-        return md5($stringParams . md5(Yii::$app->params['OkApiKey'] . Yii::$app->params['OkAppSecretKey']));
+        return md5($stringParams . Yii::$app->params['OkAppSecretKey']);
     }
 
     /**
@@ -269,39 +270,18 @@ class OkPublishJob extends SocialPublishJob
      */
     private function getOkUploadUrl(Client $client): string
     {
-
-        $method = 'photosV2.getUploadUrl';
-
-        $params = [
-            'application_key' => Yii::$app->params['OkAppPublicKey'],
-            'count' => 1,
-            'format' => 'json',
-            'gid' => Yii::$app->params['OkGroupId'],
-            'method' => $method,
-            'access_token' => Yii::$app->params['OkApiKey']
-        ];
-
-        ksort($params);
-        $sig_string = '';
-        foreach ($params as $key => $value) {
-            $sig_string .= $key . '=' . $value;
-        }
-
-        $response = $this->executeWithRetry(function () use ($client, $method, $sig_string) {
+        $response = $this->executeWithRetry(function () use ($client) {
             $request = $client->createRequest()
-                ->setMethod('GET')
-                ->setUrl('https://api.ok.ru/fb.do')
+                ->setMethod('POST')
+                ->setUrl('https://api.ok.ru/api/photosV2/getUploadUrl')
                 ->setData([
                     'application_key' => Yii::$app->params['OkAppPublicKey'],
                     'count' => 1,
-                    'format' => 'json',
                     'gid' => Yii::$app->params['OkGroupId'],
-                    'method' => $method,
-                    'sig' => $this->calculateSignature($sig_string),
                     'access_token' => Yii::$app->params['OkApiKey']
                 ]);
 
-            Yii::info("REQUEST [photosV2.getUploadUrl]: GET https://api.ok.ru/fb.do", 'jobs-ok');
+            Yii::info("REQUEST [photosV2.getUploadUrl]: POST https://api.ok.ru/api/photosV2/getUploadUrl", 'jobs-ok');
 
             $resp = $request->send();
 

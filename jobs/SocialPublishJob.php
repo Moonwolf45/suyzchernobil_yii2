@@ -5,6 +5,7 @@ namespace app\jobs;
 use app\models\News;
 use Yii;
 use yii\base\BaseObject;
+use yii\db\Exception;
 use yii\helpers\Url;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
@@ -33,12 +34,12 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
     protected const RETRY_DELAY = 1000;
 
     /**
-     * @var string Поле для отметки времени публикации (например 'published_at_vk')
+     * @return string Поле для отметки времени публикации (например 'published_at_vk')
      */
     protected abstract function getPublishedAtField(): string;
 
     /**
-     * @var string Название соцсети для логирования
+     * @return string Название соцсети для логирования
      */
     protected abstract function getSocialNetworkName(): string;
 
@@ -47,6 +48,7 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
      * @param News $news
      * @param int &$uploadedImagesCount Счётчик загруженных изображений (выходной параметр)
      * @param int &$failedImagesCount Счётчик неудачных загрузок (выходной параметр)
+     *
      * @return bool Успешно ли выполнена публикация
      */
     protected abstract function publish(Client $client, News $news, int &$uploadedImagesCount = 0, int &$failedImagesCount = 0): bool;
@@ -54,6 +56,7 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
     /**
      * @param Client $client
      * @param array $images
+     *
      * @return array Массив загруженных изображений (формат зависит от соцсети)
      */
     protected abstract function uploadImages(Client $client, array $images): array;
@@ -160,6 +163,7 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
                 if ($countImage >= self::MAX_IMAGES) {
                     break;
                 }
+
                 if (!empty($image['image'])) {
                     $images[] = $image['image'];
                     $countImage++;
@@ -174,6 +178,7 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
      * Отмечает новость как опубликованную
      *
      * @param News $news
+     * @throws Exception
      */
     protected function markAsPublished(News $news): void
     {
@@ -301,7 +306,7 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
         $message .= "🔗 <a href='" . Url::to(['news/view', 'category_alias' => $news->category['slug'], 'alias' => $news->slug], true)
             . "'>Открыть новость</a>";
 
-        $this->sendTelegramNotification($message, false);
+        $this->sendTelegramNotification($message);
     }
 
     /**

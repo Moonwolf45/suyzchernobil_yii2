@@ -18,9 +18,9 @@ class VkPublishJob extends SocialPublishJob
     private const VK_API_VERSION = '5.131';
 
     /**
-     * @var string Кеш URL серверов загрузки
+     * @var ?string Кеш URL серверов загрузки
      */
-    private static $uploadUrlCache = null;
+    private static ?string $uploadUrlCache = null;
 
     /**
      * @inheritdoc
@@ -179,16 +179,13 @@ class VkPublishJob extends SocialPublishJob
     {
         // Получаем URL с кешированием
         $uploadUrl = $this->getVkUploadUrl($client);
-        
         if (!$uploadUrl) {
             Yii::error("Не удалось получить сервер загрузки (image {$index})", 'jobs-vk');
 
             return null;
         }
 
-        // Шаг 2: Загружаем изображение
         $fullPath = Yii::getAlias('@app/web/' . $imagePath);
-
         if (!file_exists($fullPath) || !is_readable($fullPath)) {
             Yii::error("Файл не существует или не читаем (image {$index}): {$fullPath}", 'jobs-vk');
 
@@ -199,7 +196,7 @@ class VkPublishJob extends SocialPublishJob
             $request = $client->createRequest()
                 ->setMethod('POST')
                 ->setUrl($uploadUrl)
-                ->addFile('photo', $fullPath);
+                ->addFile('photo', '@' . $fullPath);
 
             Yii::info("REQUEST [photo upload]: POST {$uploadUrl}", 'jobs-vk');
 
@@ -233,7 +230,6 @@ class VkPublishJob extends SocialPublishJob
             return null;
         }
 
-        // Шаг 3: Сохраняем изображение
         $saveResponse = $this->executeWithRetry(function () use ($client, $photo, $server, $hash, $index) {
             $request = $client->createRequest()
                 ->setMethod('GET')
@@ -247,11 +243,11 @@ class VkPublishJob extends SocialPublishJob
                     'v' => self::VK_API_VERSION
                 ]);
 
-            Yii::info("REQUEST [photos.saveWallPhoto] (image {$index}): POST https://api.vk.com/method/photos.saveWallPhoto", 'jobs-vk');
+            Yii::info("REQUEST [photos.saveWallPhoto] (image {$index}): GET https://api.vk.com/method/photos.saveWallPhoto", 'jobs-vk');
 
             $resp = $request->send();
 
-            Yii::info("REQUEST [photos.saveWallPhoto] (image {$index}): POST {$request->getFullUrl()}", 'jobs-vk');
+            Yii::info("REQUEST [photos.saveWallPhoto] (image {$index}): GET {$request->getFullUrl()}", 'jobs-vk');
             Yii::info("RESPONSE [photos.saveWallPhoto] (image {$index}): " . json_encode($resp->data), 'jobs-vk');
 
             return $resp;
@@ -310,7 +306,7 @@ class VkPublishJob extends SocialPublishJob
         }
 
         if (array_key_exists('error', $response->data)) {
-            Yii::error("API error getWallUploadServer: " . json_encode($response->data['error']), 'jobs-vk');
+            Yii::error("API error getWallUploadServer: " . $response->data['error'], 'jobs-vk');
 
             return null;
         }
