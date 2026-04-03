@@ -186,7 +186,7 @@ class VkPublishJob extends SocialPublishJob
             return null;
         }
 
-        $fullPath = Yii::getAlias('@web/' . $imagePath);
+        $fullPath = Yii::getAlias('@app/web/' . $imagePath);
         if (!file_exists($fullPath) || !is_readable($fullPath)) {
             Yii::error("Файл не существует или не читаем (image {$index}): {$fullPath}", 'jobs-vk');
 
