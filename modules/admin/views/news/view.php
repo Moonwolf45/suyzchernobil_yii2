@@ -105,8 +105,8 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'id',
             [
                 'attribute' => 'news_id',
-                'content' => function($data) {
-                    return $data->news->title;
+                'content' => function() use ($model) {
+                    return $model->title;
                 }
             ], [
                 'attribute' => 'image',
@@ -115,8 +115,8 @@ $this->params['breadcrumbs'][] = $this->title; ?>
                 }
             ], [
                 'class' => ActionColumn::class,
-                'urlCreator' => function ($action, NewsImage $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
+                'urlCreator' => function ($action, NewsImage $ni_model, $key, $index, $column) {
+                    return Url::toRoute([$action, 'id' => $ni_model->id]);
                 }
             ],
         ],

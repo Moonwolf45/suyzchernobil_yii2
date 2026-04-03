@@ -72,6 +72,7 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
             if (!$news) {
                 Yii::warning("Новость с ID {$this->news_id} не найдена", 'jobs-social');
                 $this->sendErrorNotification(null, "Новость с ID {$this->news_id} не найдена в базе данных");
+
                 return;
             }
 
@@ -255,7 +256,7 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
 
         try {
             $emoji = $isError ? '❌' : '✅';
-            $fullMessage = "{$emoji} <b>Публикация в {$this->getSocialNetworkName()}</b>%0A%0A{$message}";
+            $fullMessage = "{$emoji} <b>Публикация в {$this->getSocialNetworkName()}</b> \r\n{$message}";
 
             $client = new Client();
             $response = $client->createRequest()
@@ -288,15 +289,16 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
      */
     protected function sendSuccessNotification(News $news, int $uploadedImagesCount = 0, int $failedImagesCount = 0): void
     {
-        $message = "<b>Новость:</b> {$news->title}%0A";
-        $message .= "<b>ID:</b> {$this->news_id}%0A";
-        $message .= "<b>Изображений:</b> загружено {$uploadedImagesCount}";
+        $message = "<b>Новость:</b> {$news->title} \r\n";
+        $message .= "<b>ID:</b> {$this->news_id} \r\n";
+        $message .= "<b>Изображений:</b> загружено {$uploadedImagesCount} \r\n";
 
         if ($failedImagesCount > 0) {
-            $message .= " (ошибок: {$failedImagesCount}) ⚠️";
+            $message .= " (ошибок: {$failedImagesCount}) ⚠️ \r\n";
         }
 
-        $message .= "%0A%0A🔗 <a href=\"https://t.me/{$news->slug}\">Открыть новость</a>";
+        $message .= "🔗 <a href='" . Url::to(['news/view', 'category_alias' => $news->category['slug'], 'alias' => $news->slug], true)
+            . "'>Открыть новость</a>";
 
         $this->sendTelegramNotification($message, false);
     }
@@ -304,21 +306,22 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
     /**
      * Отправляет уведомление об ошибке публикации
      *
-     * @param News $news|null
+     * @param News|null $news
      * @param string $errorMessage Текст ошибки
      *
      * @return void
      */
     protected function sendErrorNotification(?News $news, string $errorMessage): void
     {
-        $message = "<b>Новость ID:</b> {$this->news_id}%0A";
+        $message = "<b>Новость ID:</b> {$this->news_id} \r\n";
 
         if ($news) {
-            $message .= "<b>Заголовок:</b> {$news->title}%0A";
+            $message .= "<b>Заголовок:</b> {$news->title} \r\n";
         }
 
-        $message .= "<b>Ошибка:</b>%0A<code>" . htmlspecialchars($errorMessage) . "</code>%0A%0A";
-        $message .= "🔗 <a href=\"https://soyzchernobilkurgan.local/admin/news/update?id={$this->news_id}\">Редактировать новость</a>";
+        $message .= "<b>Ошибка:</b> \r\n<code>" . htmlspecialchars($errorMessage) . "</code>  \r\n";
+        $message .= "🔗 <a href='" . Url::to(['admin/news/update', 'id' => $this->news_id], true)
+            . "'>Редактировать новость</a>";
 
         $this->sendTelegramNotification($message, true);
     }

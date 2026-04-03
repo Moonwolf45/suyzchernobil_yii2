@@ -132,6 +132,7 @@ class OkPublishJob extends SocialPublishJob
             if (!$this->imageExists($imagePath)) {
                 Yii::warning("Файл изображения не найден: {$imagePath}", 'jobs-ok');
                 $failedCount++;
+
                 continue;
             }
 
@@ -180,17 +181,31 @@ class OkPublishJob extends SocialPublishJob
         
         if (!$uploadUrl) {
             Yii::error("Не удалось получить URL загрузки (image {$index})", 'jobs-ok');
+            
             return null;
         }
 
         // Шаг 2: Загружаем изображение
-        $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $imagePath) {
-            return $client->createRequest()
-                ->setMethod('POST')
-                ->setUrl($uploadUrl)
-                ->addFile('pic1', Yii::getAlias('@app/web/' . $imagePath))
-                ->send();
-        }, "photo upload (image {$index})");
+        $fullPath = Yii::getAlias('@app/web/' . $imagePath);
+        $fileHandle = fopen($fullPath, 'r');
+
+        if ($fileHandle === false) {
+            Yii::error("Не удалось открыть файл для загрузки (image {$index}): {$fullPath}", 'jobs-ok');
+
+            return null;
+        }
+
+        try {
+            $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $fileHandle) {
+                return $client->createRequest()
+                    ->setMethod('POST')
+                    ->setUrl($uploadUrl)
+                    ->addFile('pic1', $fileHandle)
+                    ->send();
+            }, "photo upload (image {$index})");
+        } finally {
+            fclose($fileHandle);
+        }
 
         if (!$uploadResponse || !$uploadResponse->isOk) {
             Yii::error("Не удалось загрузить фото на сервер (image {$index})", 'jobs-ok');
@@ -250,25 +265,42 @@ class OkPublishJob extends SocialPublishJob
             return self::$uploadUrlCache;
         }
 
-        $response = $this->executeWithRetry(function () use ($client) {
+        $method = 'photosV2.getUploadUrl';
+        $sig = md5(
+            'application_key=' . Yii::$app->params['OkAppPublicKey'] .
+            'format=json' .
+            'gid=' . Yii::$app->params['OkGroupId'] .
+            'method=' . $method .
+            Yii::$app->params['OkAppSecretKey']
+        );
+
+        $response = $this->executeWithRetry(function () use ($client, $method, $sig) {
             return $client->createRequest()
                 ->setMethod('POST')
-                ->setUrl('https://api.ok.ru/api/photosV2.getUploadUrl')
+                ->setUrl('https://api.ok.ru/api/' . $method)
                 ->setData([
                     'count' => 1,
                     'application_key' => Yii::$app->params['OkAppPublicKey'],
                     'access_token' => Yii::$app->params['OkApiKey'],
-                    'gid' => Yii::$app->params['OkGroupId']
+                    'gid' => Yii::$app->params['OkGroupId'],
+                    'method' => $method,
+                    'sig' => $sig
                 ])
                 ->send();
         }, 'photosV2.getUploadUrl');
 
         if (!$response || !$response->isOk) {
+            $errorData = $response ? json_encode($response->data) : 'no response';
+            Yii::error("getUploadUrl: response is not ok. Data: {$errorData}", 'jobs-ok');
+
             return '';
         }
 
         if (array_key_exists('error_code', $response->data)) {
-            Yii::error("API error getUploadUrl: " . json_encode($response->data['error_code']), 'jobs-ok');
+            Yii::error(
+                "API error getUploadUrl: " . json_encode($response->data),
+                'jobs-ok'
+            );
 
             return '';
         }
@@ -277,8 +309,10 @@ class OkPublishJob extends SocialPublishJob
 
         if ($uploadUrl) {
             self::$uploadUrlCache = $uploadUrl;
+        } else {
+            Yii::error("getUploadUrl: upload_url not found in response: " . json_encode($response->data), 'jobs-ok');
         }
 
-        return $uploadUrl;
+        return $uploadUrl ?? '';
     }
 }

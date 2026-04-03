@@ -254,17 +254,21 @@ class NewsController extends Controller {
      * @param $image
      *
      * @return false|string
-     * @throws StaleObjectException
      * @throws \Throwable
      */
     public function actionDeleteImages($id_model, $image): bool|string {
         $news_image = NewsImage::find()->where(['id' => $image, 'news_id' => $id_model])->one();
 
-        if (@unlink($news_image->image)) {
+        try {
+            if (file_exists($news_image->image)) {
+                @unlink($news_image->image);
+            }
             $news_image->delete();
 
             $res = true;
-        } else {
+        } catch (\Throwable $e) {
+            Yii::error($e->getMessage());
+
             $res = false;
         }
 

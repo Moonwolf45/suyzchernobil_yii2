@@ -79,10 +79,12 @@ class VkPublishJob extends SocialPublishJob
             }
 
             Yii::error('wall.post: response is not ok', 'jobs-vk');
+
             return false;
 
         } catch (\Exception $e) {
             Yii::error('wall.post exception: ' . $e->getMessage(), 'jobs-vk');
+
             return false;
         }
     }
@@ -124,6 +126,7 @@ class VkPublishJob extends SocialPublishJob
             if (!$this->imageExists($imagePath)) {
                 Yii::warning("Файл изображения не найден: {$imagePath}", 'jobs-vk');
                 $failedCount++;
+
                 continue;
             }
 
@@ -172,17 +175,31 @@ class VkPublishJob extends SocialPublishJob
         
         if (!$uploadUrl) {
             Yii::error("Не удалось получить сервер загрузки (image {$index})", 'jobs-vk');
+
             return null;
         }
 
         // Шаг 2: Загружаем изображение
-        $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $imagePath) {
-            return $client->createRequest()
-                ->setMethod('POST')
-                ->setUrl($uploadUrl)
-                ->addFile('photo', Yii::getAlias('@app/web/' . $imagePath))
-                ->send();
-        }, "photo upload (image {$index})");
+        $fullPath = Yii::getAlias('@app/web/' . $imagePath);
+        $fileHandle = fopen($fullPath, 'r');
+
+        if ($fileHandle === false) {
+            Yii::error("Не удалось открыть файл для загрузки (image {$index}): {$fullPath}", 'jobs-vk');
+
+            return null;
+        }
+
+        try {
+            $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $fileHandle) {
+                return $client->createRequest()
+                    ->setMethod('POST')
+                    ->setUrl($uploadUrl)
+                    ->addFile('photo', $fileHandle)
+                    ->send();
+            }, "photo upload (image {$index})");
+        } finally {
+            fclose($fileHandle);
+        }
 
         if (!$uploadResponse || !$uploadResponse->isOk) {
             Yii::error("Не удалось загрузить фото на сервер (image {$index})", 'jobs-vk');
