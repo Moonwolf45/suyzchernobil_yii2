@@ -4,7 +4,6 @@ namespace app\jobs;
 
 
 use app\models\News;
-use CURLFile;
 use Yii;
 use yii\httpclient\Client;
 
@@ -169,7 +168,7 @@ class VkPublishJob extends SocialPublishJob
     }
 
     /**
-     * Загружает одно изображение ВКонтакте
+     * Загружает одно изображение ВКонтакте через чистый curl
      *
      * @param Client $client
      * @param string $imagePath
@@ -193,47 +192,23 @@ class VkPublishJob extends SocialPublishJob
             return null;
         }
 
-        $uploadResponse = $this->executeWithRetry(function () use ($client, $uploadUrl, $fullPath, $index) {
-            $request = $client->createRequest()
-                ->setMethod('POST')
-                ->setUrl($uploadUrl)
-                ->addFile('photo', new \CurlFile($fullPath))
-                ->addHeaders([
-                    'Content-Type' => 'multipart/form-data; charset=UTF-8',
-                ]);
+        // Шаг 1: Загружаем фото на сервер ВКонтакте через чистый curl
+        $uploadData = $this->uploadPhotoViaCurl($uploadUrl, $fullPath, $index);
+        if (!$uploadData) {
+            return null;
+        }
 
-            Yii::info("REQUEST [photo upload]: POST {$uploadUrl}", 'jobs-vk');
-            Yii::info("REQUEST [photo upload]: POST photo: {$fullPath}", 'jobs-vk');
+        $photo = $uploadData['photo'] ?? null;
+        $server = $uploadData['server'] ?? null;
+        $hash = $uploadData['hash'] ?? null;
 
-            $response = $request->send();
-
-            Yii::info("RESPONSE [photo upload]: " . json_encode($response->data), 'jobs-vk');
-
-            return $response;
-        }, "photo upload (image {$index})");
-
-        if (!$uploadResponse || !$uploadResponse->isOk) {
-            Yii::error("Не удалось загрузить фото на сервер (image {$index})", 'jobs-vk');
+        if (empty($photo) || empty($server) || empty($hash)) {
+            Yii::error("Неполный ответ от сервера загрузки (image {$index}): " . json_encode($uploadData), 'jobs-vk');
 
             return null;
         }
 
-        if (array_key_exists('error', $uploadResponse->data)) {
-            Yii::error("API error upload: " . json_encode($uploadResponse->data['error']), 'jobs-vk');
-
-            return null;
-        }
-
-        $photo = $uploadResponse->data['photo'] ?? null;
-        $server = $uploadResponse->data['server'] ?? null;
-        $hash = $uploadResponse->data['hash'] ?? null;
-
-        if (empty($photo) && mb_strlen($photo) <= 2) {
-            Yii::error("Некорректный photo параметр", 'jobs-vk');
-
-            return null;
-        }
-
+        // Шаг 2: Сохраняем фото
         $saveResponse = $this->executeWithRetry(function () use ($client, $photo, $server, $hash, $index) {
             $request = $client->createRequest()
                 ->setMethod('GET')
@@ -279,6 +254,69 @@ class VkPublishJob extends SocialPublishJob
         Yii::error("Пустой ответ от saveWallPhoto", 'jobs-vk');
 
         return null;
+    }
+
+    /**
+     * Загружает фото на сервер ВКонтакте через чистый curl
+     *
+     * @param string $uploadUrl
+     * @param string $filePath
+     * @param int $index
+     * @return array|null Массив с photo, server, hash или null
+     */
+    private function uploadPhotoViaCurl(string $uploadUrl, string $filePath, int $index): ?array
+    {
+        $ch = curl_init();
+        
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $uploadUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => [
+                'photo' => new \CURLFile($filePath, 'image/jpeg', basename($filePath))
+            ],
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_TIMEOUT => 60,
+            CURLOPT_CONNECTTIMEOUT => 30,
+        ]);
+
+        Yii::info("CURL REQUEST [photo upload] (image {$index}): POST {$uploadUrl}, file: {$filePath}", 'jobs-vk');
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        
+        curl_close($ch);
+
+        if ($error) {
+            Yii::error("CURL error (image {$index}): {$error}", 'jobs-vk');
+            return null;
+        }
+
+        if ($httpCode !== 200) {
+            Yii::error("HTTP error (image {$index}): code {$httpCode}, response: {$response}", 'jobs-vk');
+
+            return null;
+        }
+
+        $data = json_decode($response, true);
+        if (!$data) {
+            Yii::error("JSON decode error (image {$index}): {$response}", 'jobs-vk');
+
+            return null;
+        }
+
+        Yii::info("CURL RESPONSE [photo upload] (image {$index}): " . json_encode($data), 'jobs-vk');
+
+        // Проверяем на наличие ошибки
+        if (isset($data['error'])) {
+            Yii::error("API error from upload server (image {$index}): " . json_encode($data['error']), 'jobs-vk');
+
+            return null;
+        }
+
+        return $data;
     }
 
     /**
