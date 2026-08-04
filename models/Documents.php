@@ -12,7 +12,8 @@ use yii\db\ActiveRecord;
  *
  * @property int $id
  * @property string $title
- * @property string $image
+ * @property string $type
+ * @property string|null $image
  * @property string $file
  * @property int $fasten
  * @property int $isPdf
@@ -23,6 +24,14 @@ class Documents extends ActiveRecord {
 
     const SCENARIO_INSERT = 'insert';
     const SCENARIO_UPDATE = 'update';
+
+    const DOCUMENT_TYPE_BOOK_OF_MEMORY = 'book_of_memory';
+    const DOCUMENT_TYPE_SOVIET_UNION_LAST_BATTLE = 'the_soviet_union_last_battle';
+
+    const DOCUMENT_TYPES = [
+        self::DOCUMENT_TYPE_BOOK_OF_MEMORY => 'Книга памяти',
+        self::DOCUMENT_TYPE_SOVIET_UNION_LAST_BATTLE => 'Последняя битва Советского Союза'
+    ];
 
     /**
      * {@inheritdoc}
@@ -56,7 +65,7 @@ class Documents extends ActiveRecord {
         return [
             [['title', 'file'], 'required', 'on' => self::SCENARIO_INSERT],
             [['title'], 'required', 'on' => self::SCENARIO_UPDATE],
-            [['title'], 'string'],
+            [['title', 'type'], 'string'],
             [['fasten', 'isPdf'], 'boolean'],
 
             [['image'], 'file', 'extensions' => Yii::$app->params['extensionsImage'],
@@ -75,6 +84,7 @@ class Documents extends ActiveRecord {
         return [
             'id' => 'ID',
             'title' => 'Название',
+            'type' => 'Тип',
             'image' => 'Изображение',
             'file' => 'Документ',
             'fasten' => 'Закрепить',

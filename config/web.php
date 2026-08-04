@@ -133,6 +133,7 @@ $config = [
                 'archive' => 'news/archive',
                 'contact' => 'news/contact',
                 'documents' => 'news/documents',
+                'the-soviet-union-last-battle' => 'news/the-soviet-union-last-battle',
                 'our-achievements' => 'news/our-achievements',
                 'subscribe' => 'news/subscribe',
 

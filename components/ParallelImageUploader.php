@@ -42,6 +42,7 @@ class ParallelImageUploader extends BaseObject
                     $result[] = $uploadedImage;
                 }
             }
+
             return $result;
         }
 
@@ -51,7 +52,7 @@ class ParallelImageUploader extends BaseObject
         foreach ($batches as $batch) {
             $batchResults = $this->processBatch($client, $images, $batch, $uploadCallback);
 
-            foreach ($batchResults as $index => $uploadedImage) {
+            foreach ($batchResults as $uploadedImage) {
                 if ($uploadedImage !== null) {
                     $result[] = $uploadedImage;
                 }
@@ -104,12 +105,8 @@ class ParallelImageUploader extends BaseObject
      * @param callable $uploadCallback Функция загрузки
      * @return array
      */
-    public function uploadWithCachedUrls(
-        Client $client,
-        array $images,
-        callable $getUrlCallback,
-        callable $uploadCallback
-    ): array {
+    public function uploadWithCachedUrls(Client $client, array $images, callable $getUrlCallback, callable $uploadCallback): array
+    {
         if (empty($images)) {
             return [];
         }
@@ -119,6 +116,7 @@ class ParallelImageUploader extends BaseObject
 
         if (!$uploadUrl) {
             Yii::error('Не удалось получить URL загрузки', 'image-uploader');
+
             return [];
         }
 

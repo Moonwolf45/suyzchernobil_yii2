@@ -59,7 +59,8 @@ class Alert extends Widget {
      *
      * @throws \Throwable
      */
-    public function run() {
+    public function run(): void
+    {
         $session = Yii::$app->session;
         $appendClass = isset($this->options['class']) ? ' ' . $this->options['class'] : '';
 

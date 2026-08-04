@@ -1,0 +1,18 @@
+includes:
+    - vendor/erickskrauch/phpstan-yii2/extension.neon
+    - vendor/erickskrauch/phpstan-yii2/rules.neon
+
+parameters:
+    bootstrapFiles:
+        - vendor/yiisoft/yii2/Yii.php
+    yii2:
+        config_path: config/web.php
+    level: 5
+    paths:
+        - assets
+        - behaviors
+        - components
+        - controllers
+        - jobs
+        - models
+        - modules/admin/controllers

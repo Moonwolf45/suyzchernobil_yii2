@@ -20,11 +20,14 @@ class VkVideoJob extends VideoInfoJob
      */
     private const URL_PATTERNS = [
         // vk.com/video_ext.php?oid=...&id=...
-        '#(?:www\.)?vk\.com/video_ext\.php\?([^#]+)#i',
+        // vk.ru/video_ext.php?oid=...&id=...
+        '#(?:www\.)?vk\.(?:com|ru)/video_ext\.php\?([^\#]+)#i',
         // vk.com/video-123456_789012345
-        '#(?:www\.)?vk\.com/video(-?\d+)_(\d+)#i',
+        // vk.ru/video-123456_789012345
+        '#(?:www\.)?vk\.(?:com|ru)/video(-?\d+)_(\d+)#i',
         // vk.com/clip-123456_789012345
-        '#(?:www\.)?vk\.com/clip(-?\d+)_(\d+)#i',
+        // vk.ru/clip-123456_789012345
+        '#(?:www\.)?vk\.(?:com|ru)/clip(-?\d+)_(\d+)#i',
     ];
 
     /**

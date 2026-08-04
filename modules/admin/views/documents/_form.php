@@ -1,5 +1,7 @@
 <?php
 
+use app\models\Documents;
+use kartik\select2\Select2;
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 
@@ -12,6 +14,15 @@ use yii\bootstrap5\ActiveForm;
     <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
 
     <?= $form->field($model, 'title')->textInput(['maxlength' => true]); ?>
+
+    <?= $form->field($model, 'type')->widget(Select2::class, [
+        'theme' => Select2::THEME_KRAJEE_BS5,
+        'data' => Documents::DOCUMENT_TYPES,
+        'options' => ['placeholder' => 'Выберите тип'],
+        'pluginOptions' => [
+            'allowClear' => true
+        ]
+    ]); ?>
 
     <div class="form-group">
         <div class="preview_img">

@@ -7,6 +7,7 @@ use app\models\Documents;
 use app\models\traits\UploadFilesTrait;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\db\Exception;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -131,7 +132,8 @@ class DocumentsController extends Controller {
      * @param int $id ID
      *
      * @return string|Response
-     * @throws NotFoundHttpException if the model cannot be found
+     *
+     * @throws NotFoundHttpException|Exception if the model cannot be found
      */
     public function actionUpdate(int $id): Response|string {
         $model = $this->findModel($id);
@@ -189,6 +191,7 @@ class DocumentsController extends Controller {
      * @param int $id ID
      *
      * @return Response
+     *
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionDelete(int $id): Response {

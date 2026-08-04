@@ -11,11 +11,6 @@ use yii\httpclient\Client;
 class YoutubeVideoJob extends VideoInfoJob
 {
     /**
-     * @var string Версия API YouTube
-     */
-    private const YOUTUBE_API_VERSION = 'v3';
-
-    /**
      * Регулярные выражения для парсинга URL YouTube
      */
     private const URL_PATTERNS = [
@@ -128,7 +123,7 @@ class YoutubeVideoJob extends VideoInfoJob
     {
         try {
             $headers = @get_headers($url);
-            return $headers && strpos($headers[0], '200') !== false;
+            return $headers && str_contains($headers[0], '200');
         } catch (\Exception $e) {
             return false;
         }

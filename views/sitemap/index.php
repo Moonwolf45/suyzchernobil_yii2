@@ -1,7 +1,6 @@
 <?php
 
 /** @var yii\web\View $this */
-/** @var string $content */
 /** @var array $items */
 /** @var string $host */
 ?>
@@ -29,6 +28,12 @@
     </url>
     <url>
         <loc>https://xn--80abggjugofbdwfe3b6c2dta2a.xn--p1ai/documents</loc>
+        <lastmod><?= date(DATE_W3C, time() - (30 * 60)); ?></lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+    <url>
+        <loc>https://xn--80abggjugofbdwfe3b6c2dta2a.xn--p1ai/the-soviet-union-last-battle</loc>
         <lastmod><?= date(DATE_W3C, time() - (30 * 60)); ?></lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>

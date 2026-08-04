@@ -22,28 +22,29 @@ class SitemapController extends Controller {
 
     public function actionIndex(): string {
         if (!$items = Yii::$app->cache->get('sitemap')) {
-            $items = [];
-            $items = array_merge($items, [
+            $categories = Category::find()->all();
+            $tags = Tag::find()->all();
+            $news = News::find()->with('category')->orderBy(['id' => SORT_DESC])->all();
+
+            $items = array_merge(
                 [
-                    'models' => Category::find()->all(),
+                    'models' => $categories,
                     'changefreq' => self::WEEKLY,
                     'priority' => 0.2,
+                ], [
+                    [
+                        'models' => $tags,
+                        'changefreq' => self::WEEKLY,
+                        'priority' => 0.5,
+                    ]
+                ], [
+                    [
+                        'models' => $news,
+                        'changefreq' => self::DAILY,
+                        'priority' => 0.8,
+                    ]
                 ]
-            ]);
-            $items = array_merge($items, [
-                [
-                    'models' => Tag::find()->all(),
-                    'changefreq' => self::WEEKLY,
-                    'priority' => 0.5,
-                ]
-            ]);
-            $items = array_merge($items,[
-                [
-                    'models' => News::find()->with('category')->orderBy(['id' => SORT_DESC])->all(),
-                    'changefreq' => self::DAILY,
-                    'priority' => 0.8,
-                ]
-            ]);
+            );
 
             Yii::$app->cache->set('sitemap', $items, 3600 * 6);
         }
@@ -52,6 +53,7 @@ class SitemapController extends Controller {
 
         Yii::$app->response->format = Response::FORMAT_RAW;
         Yii::$app->response->headers->add('Content-Type', 'text/xml');
+
         return $this->renderPartial('index', compact('host', 'items'));
     }
 }

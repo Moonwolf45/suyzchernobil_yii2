@@ -144,6 +144,7 @@ $this->registerMetaTag(['name' => 'yandex-verification', 'content' => '43733762e
                         ['label' => 'Главная', 'url' => ['/news/index']],
                         ['label' => 'Архив', 'url' => ['/news/archive']],
                         ['label' => 'Книга памяти', 'url' => ['/news/documents']],
+                        ['label' => 'Последняя битва Советского Союза', 'url' => ['/news/the-soviet-union-last-battle']],
                         ['label' => 'Наши достижения', 'url' => ['/news/our-achievements']],
                         ['label' => 'Контакты', 'url' => ['/news/contact']],
                     ],

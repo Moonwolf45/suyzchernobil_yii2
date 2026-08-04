@@ -12,6 +12,8 @@ use yii\bootstrap5\LinkPager;
 use yii\helpers\Url;
 
 $this->params['breadcrumbs'][] = 'Поиск: ' . $q;
+
+$startIndex = ($pages->getPage() * $pages->getPageSize()) + 1;
 ?>
 <div class="container-fluid pb-4 pt-4 paddding">
     <div class="container paddding">
@@ -33,6 +35,7 @@ $this->params['breadcrumbs'][] = 'Поиск: ' . $q;
                             <?= Html::submitButton('Поиск', ['class' => 'btn btn-outline-secondary']); ?>
                         </div>
                     <?php ActiveForm::end(); ?>
+
                     <div>
                         <div class="fh5co_heading fh5co_heading_border_bottom py-2 mb-4">
                             Поиск: <?= $q; ?>

@@ -33,7 +33,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: mbstring, gd, curl, imagick, pdo_mysql
+          extensions: mbstring, gd, curl, imagick, pdo_mysql, exif
           tools: composer:v${{ env.COMPOSER_VERSION }}
           coverage: none
 
@@ -46,6 +46,10 @@ jobs:
           echo "Проверка синтаксиса PHP файлов..."
           find . -name "*.php" -not -path "./vendor/*" -not -path "./runtime/*" -not -path "./web/assets/*" | xargs -n1 -P4 php -l
           echo "✅ Все файлы прошли проверку"
+
+      - name: Запуск PHPStan
+        run: |
+          vendor/bin/phpstan analyse --level=5
 
       - name: Настройка прав доступа
         run: |

@@ -276,9 +276,8 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
                 ->send();
 
             if (!$response->isOk) {
-                Yii::error("Не удалось отправить уведомление в Telegram: " . $response->data['description'] ?? 'Unknown error', 'jobs-social');
+                Yii::error("Не удалось отправить уведомление в Telegram: " . $response->data['description'], 'jobs-social');
             }
-
         } catch (\Throwable $e) {
             Yii::error("Ошибка отправки уведомления в Telegram: " . $e->getMessage(), 'jobs-social');
         }

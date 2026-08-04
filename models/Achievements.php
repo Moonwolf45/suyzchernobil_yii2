@@ -12,7 +12,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $id
  * @property string $title
- * @property string $image
+ * @property string|null $image
  * @property string $file
  * @property int $fasten
  * @property int $isPdf

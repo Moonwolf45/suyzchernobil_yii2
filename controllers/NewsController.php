@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-
 use app\models\Achievements;
 use app\models\Category;
 use app\models\Documents;
@@ -14,6 +13,7 @@ use app\models\traits\MailToUserTrait;
 use app\models\traits\MetaTrait;
 use Yii;
 use yii\data\Pagination;
+use yii\db\Exception;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
@@ -91,12 +91,13 @@ class NewsController extends Controller {
     }
 
     /**
-     * @param $category_alias
-     * @param $alias
+     * @param string $alias
      *
      * @return string
+     *
+     * @throws Exception
      */
-    public function actionView($category_alias, $alias): string {
+    public function actionView(string $alias): string {
         $news = News::find()->joinWith(['category', 'newsImages', 'tags'])->where([News::tableName() . '.slug' => $alias])->one();
         $news->views += 1;
         $news->twisted_views += rand(5, 15);
@@ -150,8 +151,23 @@ class NewsController extends Controller {
     public function actionDocuments(): string {
         $this->setMeta($this, null, 'Регистрационные документы, устав, нормативно-правовые и законодательные базы, сертификаты');
 
-        $documents = Documents::find()->orderBy([Documents::tableName() . '.fasten' => SORT_DESC,
-            Documents::tableName() . '.id' => SORT_DESC])->asArray()->all();
+        $documents = Documents::find()->where(['type' => Documents::DOCUMENT_TYPE_BOOK_OF_MEMORY])
+            ->orderBy([Documents::tableName() . '.fasten' => SORT_DESC, Documents::tableName() . '.id' => SORT_DESC])
+            ->asArray()->all();
+
+        return $this->render('documents', compact('documents'));
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function actionTheSovietUnionLastBattle(): string {
+        $this->setMeta($this, null, 'Регистрационные документы, устав, нормативно-правовые и законодательные базы, сертификаты');
+
+        $documents = Documents::find()->where(['type' => Documents::DOCUMENT_TYPE_SOVIET_UNION_LAST_BATTLE])
+            ->orderBy([Documents::tableName() . '.fasten' => SORT_DESC, Documents::tableName() . '.id' => SORT_DESC])
+            ->asArray()->all();
 
         return $this->render('documents', compact('documents'));
     }
@@ -177,8 +193,9 @@ class NewsController extends Controller {
     public function actionContact(): Response|string {
         $model = new ContactForm();
 
-        if ($model->load(Yii::$app->request->post()) && $this->sendMailToUser(Yii::$app->params['adminEmail'],
-                'contact', $model->subject, ['name' => $model->name, 'email' => $model->email, 'body' => $model->body])) {
+        if ($model->load(Yii::$app->request->post())) {
+            $this->sendMailToUser(Yii::$app->params['adminEmail'],
+                'contact', $model->subject, ['name' => $model->name, 'email' => $model->email, 'body' => $model->body]);
 
             Yii::$app->session->setFlash('contact', [['result' => 'success', 'value' => 'Письмо успешно отправлено']]);
 
@@ -224,6 +241,8 @@ class NewsController extends Controller {
 
     /**
      * @return Response
+     *
+     * @throws Exception
      */
     public function actionSubscribe(): Response {
         $postSubscribe = Yii::$app->request->post();
@@ -234,6 +253,7 @@ class NewsController extends Controller {
         } else {
             $model = new Subscribes();
             $model->email = $postSubscribe['email'];
+
             if ($model->validate() && $model->save()) {
                 Yii::$app->session->setFlash('subscribe', [['result' => 'success', 'value' => 'Вы успешно подписались на рассылку.']]);
             } else {

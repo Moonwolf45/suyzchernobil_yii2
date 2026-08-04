@@ -14,29 +14,33 @@ $this->params['breadcrumbs'][] = ['label' => $news['title']];
 ?>
 
 <div class="single" itemscope itemtype="https://schema.org/NewsArticle">
+    <link itemprop="mainEntityOfPage" href="<?= Url::current([], true); ?>" />
+
+    <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization" style="display:none;">
+        <meta itemprop="name" content="<?= Html::encode(Yii::$app->params['title']); ?>" />
+        <link itemprop="url" href="<?= Url::base(true); ?>" />
+    </div>
+
     <?php if(!empty($news['image'])): ?>
         <?php $image = explode('/', $news['image']); ?>
-
-        <div style="display: none;" itemscope itemprop="image" itemtype="https://schema.org/ImageObject">
-            <img itemprop="url contentUrl" src="<?= '/' . $image[0] . '/' . $image[1] . '/1920x1272_' . $image[2]; ?>">
-        </div>
-
-        <div id="fh5co-title-box" style="background-image: url(<?= '/' . $image[0] . '/' . $image[1]
-            . '/1920x1272_' . $image[2]; ?>);" data-stellar-background-ratio="0.5">
+        <?php $imageUrl = '/' . $image[0] . '/' . $image[1] . '/1920x1272_' . $image[2]; ?>
     <?php else: ?>
-        <div style="display: none;" itemscope itemprop="image" itemtype="https://schema.org/ImageObject">
-            <img itemprop="url contentUrl" src="<?= '/images/placeHolder.png'; ?>">
-        </div>
-
-        <div id="fh5co-title-box" style="background-image: url(/images/placeHolder.png);" data-stellar-background-ratio="0.5">
+        <?php $imageUrl = '/images/placeHolder.png'; ?>
     <?php endif; ?>
+
+    <div style="display: none;" itemscope itemtype="https://schema.org/ImageObject" itemprop="image">
+        <link itemprop="url" href="<?= Url::base(true) . $imageUrl; ?>">
+        <link itemprop="contentUrl" href="<?= Url::base(true) . $imageUrl; ?>">
+    </div>
+
+    <div id="fh5co-title-box" style="background-image: url(<?= $imageUrl; ?>);" data-stellar-background-ratio="0.5">
         <div class="overlay"></div>
         <div class="page-title">
-            <span itemprop="datePublished" datetime="<?= date(DATE_W3C, $news['created_at']); ?>">
+            <time itemprop="datePublished" datetime="<?= date(DATE_W3C, $news['created_at']); ?>">
                 <?= Yii::$app->formatter->asDate($news['created_at'], 'long'); ?>
-            </span>
+            </time>
             <span><i class="far fa-eye"></i> <?= $news['twisted_views']; ?></span>
-            <h2 itemprop="headline"><?= $news['title']; ?></h2>
+            <h2 itemprop="headline"><?= Html::encode($news['title']); ?></h2>
         </div>
     </div>
 
@@ -78,16 +82,14 @@ $this->params['breadcrumbs'][] = ['label' => $news['title']];
                 <?= $this->render('@app/views/_parts/right_bar'); ?>
             </div>
 
-            <span style="display: none;" itemprop="author" itemscope itemtype="https://schema.org/Organization">
-                <a itemprop="url" href="<?= Url::base(true); ?>">
-                    <span itemprop="name"><?= Yii::$app->params['title']; ?></span>
-                </a>
-            </span>
+            <div style="display:none;" itemprop="author" itemscope itemtype="https://schema.org/Organization">
+                <meta itemprop="name" content="<?= Html::encode(Yii::$app->params['title']); ?>" />
+                <link itemprop="url" href="<?= Url::base(true); ?>" />
+            </div>
         </div>
     </div>
 
     <meta itemprop="dateModified" content="<?= date(DATE_W3C, $news['updated_at']); ?>" />
-    <meta itemscope itemprop="mainEntityOfPage" itemType="https://schema.org/WebPage" itemid="<?= Url::current([], true); ?>" />
 </div>
 
 <?php
