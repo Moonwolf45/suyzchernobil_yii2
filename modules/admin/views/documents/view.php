@@ -1,10 +1,11 @@
 <?php
 
+use app\models\Documents;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
-/** @var app\models\Documents $model */
+/** @var Documents $model */
 
 $this->title = $model->title;
 $this->params['breadcrumbs'][] = ['label' => 'Документы', 'url' => ['index']];
@@ -28,6 +29,11 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'id',
             'title',
             [
+                    'attribute' => 'type',
+                    'content' => function(Documents $data) {
+                        return Documents::DOCUMENT_TYPES[$data->type];
+                    }
+            ], [
                 'attribute' => 'image',
                 'format' => ['html'],
                 'value' => function($data) {
@@ -39,22 +45,22 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'file',
             [
                 'attribute' => 'fasten',
-                'value' => function($data) {
+                'value' => function(Documents $data) {
                     return $data->fasten === 1 ? 'Да' : 'Нет';
                 }
             ], [
                 'attribute' => 'isPdf',
-                'value' => function($data) {
+                'value' => function(Documents $data) {
                     return $data->isPdf === 1 ? 'Да' : 'Нет';
                 }
             ], [
                 'attribute' => 'created_at',
-                'value' => function($data) {
+                'value' => function(Documents $data) {
                     return Yii::$app->formatter->asDate($data->created_at, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'updated_at',
-                'value' => function($data) {
+                'value' => function(Documents $data) {
                     return Yii::$app->formatter->asDate($data->updated_at, 'php:d.m.Y H:i:s');
                 }
             ]

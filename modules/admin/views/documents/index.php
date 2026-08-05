@@ -25,8 +25,13 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'id',
             'title',
             [
+                'attribute' => 'type',
+                'content' => function(Documents $data) {
+                    return Documents::DOCUMENT_TYPES[$data->type];
+                }
+            ], [
                 'attribute' => 'image',
-                'content' => function($data) {
+                'content' => function(Documents $data) {
                     return Html::img('@web/' . $data->image, [
                         'style' => 'max-width: 400px; max-height: 400px; width: auto; height: auto;'
                     ]);
@@ -35,22 +40,22 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'file',
             [
                 'attribute' => 'fasten',
-                'value' => function($data) {
+                'value' => function(Documents $data) {
                     return $data->fasten === 1 ? 'Да' : 'Нет';
                 }
             ], [
                 'attribute' => 'isPdf',
-                'value' => function($data) {
+                'value' => function(Documents $data) {
                     return $data->isPdf === 1 ? 'Да' : 'Нет';
                 }
             ], [
                 'attribute' => 'created_at',
-                'content' => function($data) {
+                'content' => function(Documents $data) {
                     return Yii::$app->formatter->asDate($data->created_at, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'updated_at',
-                'content' => function($data) {
+                'content' => function(Documents $data) {
                     return Yii::$app->formatter->asDate($data->updated_at, 'php:d.m.Y H:i:s');
                 }
             ], [
