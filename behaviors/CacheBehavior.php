@@ -2,15 +2,14 @@
 
 namespace app\behaviors;
 
-
 use Yii;
 use yii\base\Behavior;
 use yii\base\Event;
 use yii\caching\TagDependency;
 use yii\db\ActiveRecord;
 
-class CacheBehavior extends Behavior {
-
+class CacheBehavior extends Behavior
+{
     /**
      * The name cache component to use.
      *
@@ -21,7 +20,8 @@ class CacheBehavior extends Behavior {
     /**
      * @inheritdoc
      */
-    public function events(): array {
+    public function events(): array
+    {
         return [
             ActiveRecord::EVENT_AFTER_INSERT => 'clearCacheEvent',
             ActiveRecord::EVENT_AFTER_UPDATE => 'clearCacheEvent',
@@ -37,7 +37,8 @@ class CacheBehavior extends Behavior {
      *
      * @return void
      */
-    public function clearCacheEvent(Event $event): void {
+    public function clearCacheEvent(Event $event): void
+    {
         TagDependency::invalidate(Yii::$app->cache, $this->cacheName);
     }
 }

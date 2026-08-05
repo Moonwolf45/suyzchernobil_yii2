@@ -16,19 +16,21 @@ use yii\db\ActiveRecord;
  *
  * @property News $news
  */
-class NewsImage extends ActiveRecord {
-
+class NewsImage extends ActiveRecord
+{
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%news_image}}';
     }
 
     /**
      * @return array
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             [
                 'class' => CacheBehavior::class,
@@ -40,7 +42,8 @@ class NewsImage extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['news_id', 'image'], 'required'],
             [['news_id'], 'integer'],
@@ -54,7 +57,8 @@ class NewsImage extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'id' => 'ID',
             'news_id' => 'Новость',
@@ -67,7 +71,8 @@ class NewsImage extends ActiveRecord {
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getNews(): ActiveQuery {
+    public function getNews(): ActiveQuery
+    {
         return $this->hasOne(News::class, ['id' => 'news_id']);
     }
 }

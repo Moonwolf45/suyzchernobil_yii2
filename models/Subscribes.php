@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -15,19 +14,21 @@ use yii\db\ActiveRecord;
  * @property int $created_at
  * @property int $updated_at
  */
-class Subscribes extends ActiveRecord {
-
+class Subscribes extends ActiveRecord
+{
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%subscribes}}';
     }
 
     /**
      * @return array
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             [
                 'class' => TimestampBehavior::class,
@@ -42,7 +43,8 @@ class Subscribes extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['email'], 'required'],
             [['status'], 'integer'],
@@ -53,7 +55,8 @@ class Subscribes extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'id' => 'ID',
             'email' => 'E-mail',

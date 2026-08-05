@@ -2,14 +2,13 @@
 
 namespace app\widgets;
 
-
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Menu;
 
-class AdminMenuWidget extends Menu {
-
+class AdminMenuWidget extends Menu
+{
     public $linkTemplate = '<a class="nav-link {class}" href="{url}"><p>{label} <i class="right fas fa-angle-left"></i></p></a>';
     public string $submenuLinkTemplate = '<a class="nav-link {class}" href="{url}"><p>{label}</p></a>';
 
@@ -20,7 +19,8 @@ class AdminMenuWidget extends Menu {
      * @return string the rendering result
      * @throws \Exception
      */
-    protected function renderItems($items): string {
+    protected function renderItems($items): string
+    {
         $n = count($items);
         $lines = [];
         foreach ($items as $i => $item) {
@@ -58,7 +58,8 @@ class AdminMenuWidget extends Menu {
      * @return string the rendering result
      * @throws \Exception
      */
-    protected function submenuRenderItems(array $items): string {
+    protected function submenuRenderItems(array $items): string
+    {
         $n = count($items);
         $lines = [];
         foreach ($items as $i => $item) {
@@ -134,7 +135,8 @@ class AdminMenuWidget extends Menu {
      * @return string the rendering result
      * @throws \Exception
      */
-    protected function submenuRenderItem(array $item): string {
+    protected function submenuRenderItem(array $item): string
+    {
         if (isset($item['url'])) {
             $template = ArrayHelper::getValue($item, 'template', $this->submenuLinkTemplate);
 

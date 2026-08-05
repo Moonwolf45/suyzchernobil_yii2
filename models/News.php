@@ -9,7 +9,6 @@ use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\httpclient\Client;
 
 /**
  * This is the model class for table "{{%news}}".
@@ -34,14 +33,15 @@ use yii\httpclient\Client;
  * @property Tag[] $tags
  * @property TagsNews[] $tagsNews
  */
-class News extends ActiveRecord {
-
+class News extends ActiveRecord
+{
     public $gallery;
     public $tagsLink;
 
     private $_url;
 
-    public function getUrl(): string{
+    public function getUrl(): string
+    {
         if ($this->_url === null) {
             $this->_url = Yii::$app->urlManager->createUrl(['news/view', 'category_alias' => $this->category->slug,
                 'alias' => $this->slug]);
@@ -53,14 +53,16 @@ class News extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%news}}';
     }
 
     /**
      * @return array
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             [
                 'class' => TimestampBehavior::class,
@@ -82,7 +84,8 @@ class News extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['title', 'category_id'], 'required'],
             [['category_id', 'views', 'twisted_views', 'created_at', 'updated_at', 'published_at_vk', 'published_at_ok'], 'integer'],
@@ -104,7 +107,8 @@ class News extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'id' => 'ID',
             'title' => 'Название',
@@ -131,7 +135,8 @@ class News extends ActiveRecord {
      *
      * @return ActiveQuery
      */
-    public function getCategory(): ActiveQuery {
+    public function getCategory(): ActiveQuery
+    {
         return $this->hasOne(Category::class, ['id' => 'category_id']);
     }
 
@@ -140,7 +145,8 @@ class News extends ActiveRecord {
      *
      * @return ActiveQuery
      */
-    public function getNewsImages(): ActiveQuery {
+    public function getNewsImages(): ActiveQuery
+    {
         return $this->hasMany(NewsImage::class, ['news_id' => 'id']);
     }
 
@@ -151,7 +157,8 @@ class News extends ActiveRecord {
      *
      * @throws InvalidConfigException
      */
-    public function getTags(): ActiveQuery {
+    public function getTags(): ActiveQuery
+    {
         return $this->hasMany(Tag::class, ['id' => 'tags_id'])
             ->viaTable('{{%tags_news}}', ['news_id' => 'id']);
     }
@@ -161,7 +168,8 @@ class News extends ActiveRecord {
      *
      * @return ActiveQuery
      */
-    public function getTagsNews(): ActiveQuery {
+    public function getTagsNews(): ActiveQuery
+    {
         return $this->hasMany(TagsNews::class, ['news_id' => 'id']);
     }
 }

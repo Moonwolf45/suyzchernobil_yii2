@@ -3,9 +3,9 @@
 use kartik\select2\Select2;
 use mihaildev\ckeditor\CKEditor;
 use mihaildev\elfinder\ElFinder;
+use yii\bootstrap5\ActiveForm;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\bootstrap5\ActiveForm;
 
 mihaildev\elfinder\Assets::noConflict($this);
 
@@ -59,10 +59,10 @@ mihaildev\elfinder\Assets::noConflict($this);
         'editorOptions' => ElFinder::ckeditorOptions('elfinder')
     ]); ?>
 
-    <?php if(!empty($gallery)): ?>
+    <?php if (!empty($gallery)): ?>
         <div class="form-group">
             <div class="row">
-                <?php foreach($gallery as $image): ?>
+                <?php foreach ($gallery as $image): ?>
                     <div class="gallery" id="<?= $image['id']; ?>_<?= $model->id; ?>">
                         <button type="button" class="close del_gallery" data-href="/admin/news/delete-images"
                                 data-model="<?= $model->id; ?>" data-image="<?= $image['id']; ?>">

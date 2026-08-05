@@ -14,7 +14,7 @@ use yii\widgets\Menu;
 AdminAsset::register($this);
 
 $this->registerCsrfMetaTags();
-$this->registerMetaTag(['http-equiv' => 'Content-Type', 'content' => 'text/html; charset=' .  Yii::$app->charset]);
+$this->registerMetaTag(['http-equiv' => 'Content-Type', 'content' => 'text/html; charset=' . Yii::$app->charset]);
 $this->registerMetaTag(['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1, shrink-to-fit=no']);
 $this->registerMetaTag(['http-equiv' => 'X-UA-Compatible', 'content' => 'IE=edge']);
 

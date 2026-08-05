@@ -7,9 +7,10 @@ use Yii;
 use yii\bootstrap5\Widget;
 use yii\caching\TagDependency;
 
-class CategoryWidget extends Widget {
-
-    public function run() {
+class CategoryWidget extends Widget
+{
+    public function run()
+    {
         $dep = new TagDependency(['tags' => 'Category']);
 
         $categories = Yii::$app->cache->getOrSet(['categories_widget'], function () {

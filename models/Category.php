@@ -23,11 +23,12 @@ use yii\db\ActiveRecord;
  *
  * @property News[] $news
  */
-class Category extends ActiveRecord {
-
+class Category extends ActiveRecord
+{
     private $_url;
 
-    public function getUrl(): string{
+    public function getUrl(): string
+    {
         if ($this->_url === null) {
             $this->_url = Yii::$app->urlManager->createUrl(['category/view', 'alias' => $this->slug]);
         }
@@ -38,14 +39,16 @@ class Category extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%categories}}';
     }
 
     /**
      * @return array
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             [
                 'class' => TimestampBehavior::class,
@@ -68,7 +71,8 @@ class Category extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['title'], 'required'],
             [['main_status'], 'integer'],
@@ -81,7 +85,8 @@ class Category extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'id' => 'ID',
             'title' => 'Название',
@@ -99,7 +104,8 @@ class Category extends ActiveRecord {
      *
      * @return ActiveQuery
      */
-    public function getNews(): ActiveQuery {
+    public function getNews(): ActiveQuery
+    {
         return $this->hasMany(News::class, ['category_id' => 'id']);
     }
 }

@@ -1,0 +1,30 @@
+grumphp:
+    hooks_dir: ~
+    hooks_preset: local
+    git_hook_variables: { }
+    stop_on_failure: true # Остановит проверку сразу на первом упавшем инструменте
+    tasks:
+        # 1. Проверка синтаксиса PHP
+        phplint:
+            triggered_by: [ 'php' ]
+
+        # 2. Проверка стиля кода (только измененные файлы)
+        phpcsfixer:
+            config: .php-cs-fixer.dist.php
+            triggered_by: [ 'php' ]
+
+        # 3. Контроль архитектуры layers
+        deptrac:
+            config: deptrac.yaml
+
+        # 4. Ваш текущий PHPStan
+        phpstan:
+            configuration: phpstan.neon # Укажите ваш файл конфига PHPStan, если он есть
+            level: 5
+            triggered_by: [ 'php' ]
+
+        # 5. Глубокий анализ типов Psalm
+        psalm:
+            config: psalm.xml
+            show_info: false
+            triggered_by: [ 'php' ]

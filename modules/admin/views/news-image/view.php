@@ -28,13 +28,13 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'id',
             [
                 'attribute' => 'news_id',
-                'value' => function($data) {
+                'value' => function ($data) {
                     return $data->news->title;
                 }
             ], [
                 'attribute' => 'image',
                 'format' => ['html'],
-                'value' => function($data) {
+                'value' => function ($data) {
                     return Html::img('@web/' . $data->image, [
                         'style' => 'max-width: 400px; max-height: 400px; width: auto; height: auto;'
                     ]);

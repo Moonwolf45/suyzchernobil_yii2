@@ -2,27 +2,27 @@
 
 namespace app\modules\admin\controllers;
 
-
 use app\models\Category;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
-
 
 /**
  * CategoryController implements the CRUD actions for Category model.
  */
-class CategoryController extends Controller {
-
+class CategoryController extends Controller
+{
     /**
      * @inheritDoc
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return array_merge(
-            parent::behaviors(), [
+            parent::behaviors(),
+            [
                 'verbs' => [
                     'class' => VerbFilter::class,
                     'actions' => [
@@ -38,7 +38,8 @@ class CategoryController extends Controller {
      *
      * @return string
      */
-    public function actionIndex(): string {
+    public function actionIndex(): string
+    {
         $dataProvider = new ActiveDataProvider([
             'query' => Category::find(),
             'pagination' => [
@@ -62,7 +63,8 @@ class CategoryController extends Controller {
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView(int $id): string {
+    public function actionView(int $id): string
+    {
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
@@ -73,7 +75,8 @@ class CategoryController extends Controller {
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|Response
      */
-    public function actionCreate(): Response|string {
+    public function actionCreate(): Response|string
+    {
         $model = new Category();
 
         if ($this->request->isPost) {
@@ -111,7 +114,8 @@ class CategoryController extends Controller {
      * @return string|Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate(int $id): Response|string {
+    public function actionUpdate(int $id): Response|string
+    {
         $model = $this->findModel($id);
 
         if ($this->request->isPost && $model->load($this->request->post())) {
@@ -137,7 +141,8 @@ class CategoryController extends Controller {
      * @return Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete(int $id): Response {
+    public function actionDelete(int $id): Response
+    {
         if ($this->findModel($id)->delete() !== false) {
             Yii::$app->session->setFlash('category', [['result' => 'success', 'value' => 'Категория успешно удалена']]);
         }
@@ -153,7 +158,8 @@ class CategoryController extends Controller {
      * @return Category the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel(int $id): Category {
+    protected function findModel(int $id): Category
+    {
         if (($model = Category::findOne(['id' => $id])) !== null) {
             return $model;
         }

@@ -9,8 +9,8 @@ use yii\base\Model;
 /**
  * ContactForm is the model behind the contact form.
  */
-class ContactForm extends Model {
-
+class ContactForm extends Model
+{
     public $name;
     public $email;
     public $subject;
@@ -20,7 +20,8 @@ class ContactForm extends Model {
     /**
      * @return array the validation rules.
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['name', 'email', 'subject', 'body'], 'required'],
             ['email', 'email'],
@@ -32,7 +33,8 @@ class ContactForm extends Model {
     /**
      * @return array customized attribute labels
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'name' => 'Имя',
             'email' => 'E-mail',

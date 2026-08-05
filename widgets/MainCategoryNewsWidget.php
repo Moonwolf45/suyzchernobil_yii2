@@ -2,15 +2,15 @@
 
 namespace app\widgets;
 
-
 use app\models\Category;
 use Yii;
 use yii\bootstrap5\Widget;
 use yii\caching\TagDependency;
 
-class MainCategoryNewsWidget extends Widget {
-
-    public function run () {
+class MainCategoryNewsWidget extends Widget
+{
+    public function run()
+    {
         $dep = new TagDependency(['tags' => ['Category', 'News']]);
 
         $categoryNews = Yii::$app->cache->getOrSet(['mainCategoryNews_widget'], function () {

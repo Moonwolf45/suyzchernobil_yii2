@@ -3,12 +3,9 @@
 namespace app\models;
 
 use app\behaviors\CacheBehavior;
-use app\jobs\VideoJob;
-use Yii;
 use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\httpclient\Client;
 
 /**
  * This is the model class for table "{{%news_video}}".
@@ -26,19 +23,21 @@ use yii\httpclient\Client;
  * @property int $created_at
  * @property int $updated_at
  */
-class NewsVideo extends ActiveRecord {
-
+class NewsVideo extends ActiveRecord
+{
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%news_video}}';
     }
 
     /**
      * @return array
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             [
                 'class' => TimestampBehavior::class,
@@ -60,7 +59,8 @@ class NewsVideo extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['title'], 'required'],
             [['views', 'twisted_views'], 'integer'],
@@ -73,7 +73,8 @@ class NewsVideo extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'id' => 'ID',
             'title' => 'Название',
@@ -91,7 +92,8 @@ class NewsVideo extends ActiveRecord {
     }
 
 
-    public function afterSave($insert, $changedAttributes) {
+    public function afterSave($insert, $changedAttributes)
+    {
         parent::afterSave($insert, $changedAttributes);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -15,19 +14,21 @@ use yii\db\ActiveRecord;
  * @property News $news
  * @property Tag $tags
  */
-class TagsNews extends ActiveRecord {
-
+class TagsNews extends ActiveRecord
+{
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%tags_news}}';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['tags_id', 'news_id'], 'required'],
             [['tags_id', 'news_id'], 'integer'],
@@ -42,7 +43,8 @@ class TagsNews extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'tags_id' => 'Tags ID',
             'news_id' => 'News ID',
@@ -54,7 +56,8 @@ class TagsNews extends ActiveRecord {
      *
      * @return ActiveQuery
      */
-    public function getNews(): ActiveQuery {
+    public function getNews(): ActiveQuery
+    {
         return $this->hasOne(News::class, ['id' => 'news_id']);
     }
 
@@ -63,7 +66,8 @@ class TagsNews extends ActiveRecord {
      *
      * @return ActiveQuery
      */
-    public function getTags(): ActiveQuery {
+    public function getTags(): ActiveQuery
+    {
         return $this->hasOne(Tag::class, ['id' => 'tags_id']);
     }
 }

@@ -11,8 +11,8 @@ use yii\base\Model;
  * @property-read User|null $user
  *
  */
-class LoginForm extends Model {
-
+class LoginForm extends Model
+{
     public $username;
     public $password;
     public $rememberMe = true;
@@ -23,7 +23,8 @@ class LoginForm extends Model {
     /**
      * @return array the validation rules.
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['username', 'password'], 'required'],
             ['rememberMe', 'boolean'],
@@ -34,7 +35,8 @@ class LoginForm extends Model {
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'username' => 'Логин',
             'password' => 'Пароль',
@@ -49,7 +51,8 @@ class LoginForm extends Model {
      * @param string $attribute the attribute currently being validated
      * @param array $params the additional name-value pairs given in the rule
      */
-    public function validatePassword($attribute, $params) {
+    public function validatePassword($attribute, $params)
+    {
         if (!$this->hasErrors()) {
             $user = $this->getUser();
 
@@ -63,9 +66,10 @@ class LoginForm extends Model {
      * Logs in a user using the provided username and password.
      * @return bool whether the user is logged in successfully
      */
-    public function login(): bool {
+    public function login(): bool
+    {
         if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
+            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
         }
         return false;
     }
@@ -75,7 +79,8 @@ class LoginForm extends Model {
      *
      * @return User|null
      */
-    public function getUser(): ?User {
+    public function getUser(): ?User
+    {
         if ($this->_user === false) {
             $this->_user = User::findByUsername($this->username);
         }

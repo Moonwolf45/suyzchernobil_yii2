@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Последняя битва Со
             <div class="col-md-8 animate-box" data-animate-effect="fadeInLeft">
                 <div>
                     <div class="fh5co_heading fh5co_heading_border_bottom py-2 mb-4">
-                        Книга памяти
+                        Последняя битва Советского Союза
                     </div>
                 </div>
 
@@ -53,6 +53,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Последняя битва Со
                     <h1>Документы еще не загружены.</h1>
                 <?php endif; ?>
             </div>
+
             <?= $this->render('@app/views/_parts/right_bar'); ?>
         </div>
     </div>

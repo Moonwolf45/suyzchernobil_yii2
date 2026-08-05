@@ -2,7 +2,6 @@
 
 namespace app\widgets;
 
-
 use Yii;
 use yii\bootstrap5\Widget;
 
@@ -25,8 +24,8 @@ use yii\bootstrap5\Widget;
  * @author Kartik Visweswaran <kartikv2@gmail.com>
  * @author Alexander Makarov <sam@rmcreative.ru>
  */
-class Alert extends Widget {
-
+class Alert extends Widget
+{
     public $key;
 
     public function init(): void

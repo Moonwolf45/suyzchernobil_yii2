@@ -11,7 +11,7 @@ $this->params['breadcrumbs'][] = $this->title; ?>
 
 <div class="user-index">
 <!--    <p>-->
-<!--        --><?php //= Html::a('Create User', ['create'], ['class' => 'btn btn-success']); ?>
+<!--        --><?php //= Html::a('Create User', ['create'], ['class' => 'btn btn-success']);?>
 <!--    </p>-->
 
     <?= GridView::widget([
@@ -22,12 +22,12 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'username',
             [
                 'attribute' => 'created_at',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Yii::$app->formatter->asDate($data->created_at, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'updated_at',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Yii::$app->formatter->asDate($data->updated_at, 'php:d.m.Y H:i:s');
                 }
 //            ], [

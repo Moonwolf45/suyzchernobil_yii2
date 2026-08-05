@@ -1,9 +1,9 @@
 <?php
 
 use yii\bootstrap5\LinkPager;
-use yii\helpers\Html;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
+use yii\helpers\Html;
 
 /** @var yii\web\View $this */
 /** @var yii\data\ActiveDataProvider $dataProvider */
@@ -24,13 +24,13 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'title',
             [
                 'attribute' => 'category_id',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return $data->category->title;
                 }
             ], [
                 'attribute' => 'tags',
                 'format' => ['html'],
-                'content' => function($data) {
+                'content' => function ($data) {
                     $tags = '';
                     if (!empty($data->tags)) {
                         foreach ($data->tags as $tag) {
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title; ?>
                 }
             ], [
                 'attribute' => 'image',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Html::img('@web/' . $data->image, [
                         'style' => 'max-width: 400px; max-height: 400px; width: auto; height: auto;'
                     ]);
@@ -52,12 +52,12 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'twisted_views',
             [
                 'attribute' => 'published_at_vk',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Yii::$app->formatter->asDate($data->published_at_vk, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'published_at_ok',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Yii::$app->formatter->asDate($data->published_at_ok, 'php:d.m.Y H:i:s');
                 }
             ], [

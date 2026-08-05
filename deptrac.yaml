@@ -1,0 +1,35 @@
+deptrac:
+  paths:
+    - ./controllers
+    - ./models
+    - ./components
+    - ./modules
+
+  layers:
+    - name: Controllers
+      collectors:
+        - type: directory
+          value: controllers/
+
+    - name: Models
+      collectors:
+        - type: directory
+          value: models/
+
+    - name: Components
+      collectors:
+        - type: directory
+          value: components/
+
+  ruleset:
+    # Контроллеры могут зависеть от Моделей и Компонентов
+    Controllers:
+      - Models
+      - Components
+
+    # Компоненты (сервисы) могут зависеть только от моделей (или других сервисов)
+    Components:
+      - Models
+
+    # Модели независимы (не могут вызывать контроллеры или компоненты)
+    Models: []

@@ -2,21 +2,22 @@
 
 namespace app\controllers;
 
-
 use app\models\Category;
 use app\models\News;
 use app\models\traits\MetaTrait;
 use yii\data\Pagination;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
+use yii\web\Controller;
 
-class CategoryController extends Controller {
+class CategoryController extends Controller
+{
     use MetaTrait;
 
     /**
      * {@inheritdoc}
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             'verbs' => [
                 'class' => VerbFilter::class,
@@ -33,7 +34,8 @@ class CategoryController extends Controller {
      *
      * @return string
      */
-    public function actionView($alias, int $page = 1): string {
+    public function actionView($alias, int $page = 1): string
+    {
         $category = Category::find()->where(['slug' => $alias])->asArray()->one();
 
         $this->setMeta($this, $category['title'], $category['meta_keywords'], $category['meta_description']);

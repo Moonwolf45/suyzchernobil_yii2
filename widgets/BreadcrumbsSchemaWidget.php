@@ -2,15 +2,15 @@
 
 namespace app\widgets;
 
-
 use yii\base\InvalidConfigException;
 use yii\bootstrap5\BootstrapWidgetTrait;
-use yii\widgets\Breadcrumbs;
 use yii\bootstrap5\Html;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
+use yii\widgets\Breadcrumbs;
 
-class BreadcrumbsSchemaWidget extends Breadcrumbs {
+class BreadcrumbsSchemaWidget extends Breadcrumbs
+{
     use BootstrapWidgetTrait;
 
     public $tag = 'ol';
@@ -32,7 +32,8 @@ class BreadcrumbsSchemaWidget extends Breadcrumbs {
      * @return string
      * @throws InvalidConfigException
      */
-    public function run(): string {
+    public function run(): string
+    {
         if (empty($this->links)) {
             return '';
         }
@@ -88,7 +89,8 @@ class BreadcrumbsSchemaWidget extends Breadcrumbs {
      * @return string
      * @throws InvalidConfigException
      */
-    protected function renderItemMarkup($link, $template, int $position = 0): string {
+    protected function renderItemMarkup($link, $template, int $position = 0): string
+    {
         $encodeLabel = ArrayHelper::remove($link, 'encode', $this->encodeLabels);
         if (array_key_exists('label', $link)) {
             $label = Html::tag('span', $encodeLabel ? Html::encode($link['label']) : $link['label'], ['itemprop' => "name"]);

@@ -2,30 +2,31 @@
 
 namespace app\modules\admin\controllers;
 
-
 use app\models\Achievements;
 use app\models\traits\UploadFilesTrait;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\web\UploadedFile;
-
 
 /**
  * AchievementsController implements the CRUD actions for Documents model.
  */
-class AchievementsController extends Controller {
+class AchievementsController extends Controller
+{
     use UploadFilesTrait;
 
     /**
      * @inheritDoc
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return array_merge(
-            parent::behaviors(), [
+            parent::behaviors(),
+            [
                 'verbs' => [
                     'class' => VerbFilter::class,
                     'actions' => [
@@ -41,7 +42,8 @@ class AchievementsController extends Controller {
      *
      * @return string
      */
-    public function actionIndex(): string {
+    public function actionIndex(): string
+    {
         $dataProvider = new ActiveDataProvider([
             'query' => Achievements::find(),
             'pagination' => [
@@ -65,7 +67,8 @@ class AchievementsController extends Controller {
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView(int $id): string {
+    public function actionView(int $id): string
+    {
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
@@ -78,7 +81,8 @@ class AchievementsController extends Controller {
      * @return string|Response
      * @throws \Exception
      */
-    public function actionCreate(): Response|string {
+    public function actionCreate(): Response|string
+    {
         $model = new Achievements();
         $model->setScenario(Achievements::SCENARIO_INSERT);
 
@@ -133,7 +137,8 @@ class AchievementsController extends Controller {
      * @return string|Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate(int $id): Response|string {
+    public function actionUpdate(int $id): Response|string
+    {
         $model = $this->findModel($id);
         $model->setScenario(Achievements::SCENARIO_UPDATE);
 
@@ -191,7 +196,8 @@ class AchievementsController extends Controller {
      * @return Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete(int $id): Response {
+    public function actionDelete(int $id): Response
+    {
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $achievement = Achievements::find()->where(['id' => $id])->one();
@@ -219,7 +225,8 @@ class AchievementsController extends Controller {
      * @return Achievements the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel(int $id): Achievements {
+    protected function findModel(int $id): Achievements
+    {
         if (($model = Achievements::findOne(['id' => $id])) !== null) {
             return $model;
         }

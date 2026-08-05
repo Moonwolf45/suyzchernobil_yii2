@@ -2,15 +2,15 @@
 
 namespace app\widgets;
 
-
 use app\models\NewsVideo;
 use Yii;
 use yii\bootstrap5\Widget;
 use yii\caching\TagDependency;
 
-class VideoNewsWidget extends Widget {
-
-    public function run () {
+class VideoNewsWidget extends Widget
+{
+    public function run()
+    {
         $dep = new TagDependency(['tags' => 'NewsVideo']);
 
         $videoNews = Yii::$app->cache->getOrSet(['newsVideo_widget'], function () {

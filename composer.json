@@ -39,11 +39,17 @@
         "yiisoft/yii2-debug": "~2.1.0",
         "yiisoft/yii2-gii": "~2.2.0",
         "phpstan/phpstan": "^2.2",
-        "erickskrauch/phpstan-yii2": "dev-master"
+        "erickskrauch/phpstan-yii2": "dev-master",
+        "squizlabs/php_codesniffer": "^4.0",
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "qossmic/deptrac-shim": "^1.0",
+        "vimeo/psalm": "^6.16",
+        "phpro/grumphp": "^2.23"
     },
     "config": {
         "allow-plugins": {
-            "yiisoft/yii2-composer" : true
+            "yiisoft/yii2-composer": true,
+            "phpro/grumphp": true
         },
         "process-timeout": 1800,
         "fxp-asset": {
@@ -56,6 +62,18 @@
     "scripts": {
         "php-stan": [
             "php vendor/bin/phpstan analyse -l 5"
+        ],
+        "php-cs-fixer diff": [
+            "php vendor/bin/php-cs-fixer fix --dry-run --diff"
+        ],
+        "php-cs-fixer fix": [
+            "php vendor/bin/php-cs-fixer fix"
+        ],
+        "deptrac": [
+            "php vendor/bin/deptrac"
+        ],
+        "psalm": [
+            "php vendor/bin/psalm"
         ],
         "post-install-cmd": [
             "yii\\composer\\Installer::postInstall"

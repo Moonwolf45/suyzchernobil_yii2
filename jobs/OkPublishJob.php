@@ -95,7 +95,7 @@ class OkPublishJob extends SocialPublishJob
                 return $resp;
             }, 'mediatopic.post');
 
-            Yii::info('mediatopic.post: ' . (string)$response->data, 'jobs-ok');
+            Yii::info('mediatopic.post: ' . (string) $response->data, 'jobs-ok');
             if ($response && $response->isOk) {
                 $hasError = array_key_exists('error_code', (array) $response->data);
 
@@ -121,10 +121,9 @@ class OkPublishJob extends SocialPublishJob
      */
     protected function uploadImages(Client $client, array $images): array
     {
-        $result = [];
         $uploadedCount = 0;
         $failedCount = 0;
-        
+
         return $this->uploadImagesInBatches($client, $images, $uploadedCount, $failedCount);
     }
 
@@ -142,18 +141,18 @@ class OkPublishJob extends SocialPublishJob
     {
         $uploadedImages = [];
         $totalImages = count($images);
-        
+
         // Разбиваем на пачки
         for ($i = 0; $i < $totalImages; $i += self::OK_BATCH_SIZE) {
             $batch = array_slice($images, $i, self::OK_BATCH_SIZE);
             $batchSize = count($batch);
-            $batchIndex = (int)($i / self::OK_BATCH_SIZE) + 1;
-            
+            $batchIndex = (int) ($i / self::OK_BATCH_SIZE) + 1;
+
             Yii::info("Загрузка пачки {$batchIndex}: {$batchSize} изображений (с {$i} по " . ($i + $batchSize - 1) . ")", 'jobs-ok');
-            
+
             // Загружаем пачку
             $batchTokens = $this->uploadBatchOfImages($client, $batch, $batchSize, $batchIndex);
-            
+
             if ($batchTokens !== null) {
                 $uploadedImages = array_merge($uploadedImages, $batchTokens);
                 $uploadedCount += count($batchTokens);
@@ -188,7 +187,7 @@ class OkPublishJob extends SocialPublishJob
     {
         // Получаем URL для загрузки с правильным count
         $uploadUrl = $this->getOkUploadUrl($client, $batchSize);
-        
+
         if (!$uploadUrl) {
             Yii::error("Не удалось получить URL загрузки для пачки {$batchIndex}", 'jobs-ok');
 
@@ -197,7 +196,7 @@ class OkPublishJob extends SocialPublishJob
 
         // Загружаем все изображения пачкой
         $uploadData = $this->uploadPhotosBatchViaCurl($uploadUrl, $imagePaths, $batchIndex);
-        
+
         if (!$uploadData) {
             return null;
         }
@@ -238,17 +237,17 @@ class OkPublishJob extends SocialPublishJob
     private function uploadPhotosBatchViaCurl(string $uploadUrl, array $imagePaths, int $batchIndex): ?array
     {
         $ch = curl_init();
-        
+
         // Формируем данные для multipart POST
         $postData = [];
         foreach ($imagePaths as $index => $imagePath) {
             $fullPath = Yii::getAlias('@app/web/' . $imagePath);
-            
+
             if (!file_exists($fullPath) || !is_readable($fullPath)) {
                 Yii::warning("Файл не найден или не читаем (пачка {$batchIndex}, фото {$index}): {$fullPath}", 'jobs-ok');
                 continue;
             }
-            
+
             // Одноклассники принимают pic1, pic2, pic3 и т.д.
             $fieldName = 'pic' . ($index + 1);
             $postData[$fieldName] = new \CURLFile($fullPath, 'image/jpeg', basename($fullPath));
@@ -276,7 +275,7 @@ class OkPublishJob extends SocialPublishJob
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
-        
+
         curl_close($ch);
 
         if ($error) {

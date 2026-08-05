@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="7"
+    phpVersion="8.1"
+    resolveFromConfigFile="true"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    findUnusedBaselineEntry="true"
+    findUnusedCode="true"
+>
+    <projectFiles>
+        <directory name="assets" />
+        <directory name="behaviors" />
+        <directory name="commands" />
+        <directory name="components" />
+        <directory name="controllers" />
+        <directory name="jobs" />
+        <directory name="models" />
+        <directory name="modules" />
+        <directory name="widgets" />
+
+        <file name="vendor/yiisoft/yii2/Yii.php" />
+        <ignoreFiles>
+            <directory name="vendor" />
+
+            <!-- Полностью исключаем шаблоны из анализа, чтобы избежать ложных срабатываний -->
+            <directory name="views" />
+            <directory name="widgets/views" />
+            <!-- Универсальный паттерн для вьюшек любых модулей: -->
+            <directory name="modules/*/views" />
+        </ignoreFiles>
+    </projectFiles>
+
+    <issueHandlers>
+        <!-- 1. Отключаем "неиспользуемые классы" для всей экосистемы Yii2 -->
+        <UnusedClass>
+            <errorLevel type="suppress">
+                <directory name="assets" />
+                <directory name="behaviors" />
+                <directory name="commands" />
+                <directory name="components" />
+                <directory name="controllers" />
+                <directory name="jobs" />
+                <directory name="models" />
+                <directory name="modules" />
+                <directory name="widgets" />
+            </errorLevel>
+        </UnusedClass>
+
+        <!-- 2. Отключаем "возможно неиспользуемые методы" (для моделей, джобов и поведений) -->
+        <PossiblyUnusedMethod>
+            <errorLevel type="suppress">
+                <directory name="behaviors" />
+                <directory name="jobs" />
+                <directory name="models" />
+            </errorLevel>
+        </PossiblyUnusedMethod>
+
+        <!-- 3. Отключаем "возможно неиспользуемые параметры" (для валидаторов моделей и экшенов контроллеров) -->
+        <PossiblyUnusedParam>
+            <errorLevel type="suppress">
+                <directory name="behaviors" />
+                <directory name="controllers" />
+                <directory name="jobs" />
+                <directory name="models" />
+                <directory name="modules/*/controllers" />
+            </errorLevel>
+        </PossiblyUnusedParam>
+
+        <!-- 4. Отключаем "возможно неиспользуемые свойства" (для публичных свойств форм вроде SearchForm) -->
+        <PossiblyUnusedProperty>
+            <errorLevel type="suppress">
+                <directory name="models" />
+            </errorLevel>
+        </PossiblyUnusedProperty>
+
+        <!-- 5. Игнорируем отсутствие внешних классов в докблоках локально -->
+        <UndefinedDocblockClass>
+            <errorLevel type="suppress">
+                <directory name="components" />
+                <directory name="controllers" />
+                <directory name="jobs" />
+                <directory name="models" />
+                <directory name="modules" />
+            </errorLevel>
+        </UndefinedDocblockClass>
+
+        <!-- 6. Отключаем требование атрибута #[\Override] для PHP 8.1 -->
+        <MissingOverrideAttribute>
+            <errorLevel type="suppress">
+                <directory name="." />
+            </errorLevel>
+        </MissingOverrideAttribute>
+
+        <!-- 7. Отключаем строгую проверку дженериков для базовых классов Yii2 -->
+        <MissingTemplateParam>
+            <errorLevel type="suppress">
+                <directory name="." />
+            </errorLevel>
+        </MissingTemplateParam>
+    </issueHandlers>
+</psalm>

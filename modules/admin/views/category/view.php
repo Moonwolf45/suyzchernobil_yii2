@@ -32,17 +32,17 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'meta_description',
             [
                 'attribute' => 'main_status',
-                'value' => function($model) {
+                'value' => function ($model) {
                     return $model->main_status === 1 ? 'Да' : 'Нет';
                 }
             ], [
                 'attribute' => 'created_at',
-                'value' => function($model) {
+                'value' => function ($model) {
                     return Yii::$app->formatter->asDate($model->created_at, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'updated_at',
-                'value' => function($model) {
+                'value' => function ($model) {
                     return Yii::$app->formatter->asDate($model->updated_at, 'php:d.m.Y H:i:s');
                 }
             ]

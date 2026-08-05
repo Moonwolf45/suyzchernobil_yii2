@@ -7,7 +7,8 @@ use yii\filters\AccessControl;
 /**
  * admin module definition class
  */
-class Module extends \yii\base\Module {
+class Module extends \yii\base\Module
+{
     /**
      * {@inheritdoc}
      */
@@ -16,12 +17,14 @@ class Module extends \yii\base\Module {
     /**
      * {@inheritdoc}
      */
-    public function init() {
+    public function init()
+    {
         parent::init();
     }
 
 
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             'access' => [
                 'class' => AccessControl::class,

@@ -2,15 +2,15 @@
 
 namespace app\widgets;
 
-
 use app\models\Tag;
 use Yii;
 use yii\bootstrap5\Widget;
 use yii\caching\TagDependency;
 
-class TagsWidget extends Widget {
-
-    public function run() {
+class TagsWidget extends Widget
+{
+    public function run()
+    {
         $dep = new TagDependency(['tags' => 'Tag']);
 
         $tags = Yii::$app->cache->getOrSet(['tags_widget'], function () {

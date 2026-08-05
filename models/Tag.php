@@ -24,14 +24,15 @@ use yii\db\ActiveRecord;
  * @property News[] $news
  * @property TagsNews[] $tagsNews
  */
-class Tag extends ActiveRecord {
-
+class Tag extends ActiveRecord
+{
     private $_url;
 
     /**
      * @return string
      */
-    public function getUrl(): string{
+    public function getUrl(): string
+    {
         if ($this->_url === null) {
             $this->_url = Yii::$app->urlManager->createUrl(['tags/view', 'alias' => $this->slug]);
         }
@@ -42,14 +43,16 @@ class Tag extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%tags}}';
     }
 
     /**
      * @return array
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             [
                 'class' => TimestampBehavior::class,
@@ -71,7 +74,8 @@ class Tag extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['title'], 'required'],
             [['title', 'slug', 'meta_keywords', 'meta_description'], 'string', 'max' => 255],
@@ -82,7 +86,8 @@ class Tag extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'id' => 'ID',
             'title' => 'Название',
@@ -100,7 +105,8 @@ class Tag extends ActiveRecord {
      * @return ActiveQuery
      * @throws InvalidConfigException
      */
-    public function getNews(): ActiveQuery {
+    public function getNews(): ActiveQuery
+    {
         return $this->hasMany(News::class, ['id' => 'news_id'])
             ->viaTable('{{%tags_news}}', ['tags_id' => 'id']);
     }
@@ -110,7 +116,8 @@ class Tag extends ActiveRecord {
      *
      * @return ActiveQuery
      */
-    public function getTagsNews(): ActiveQuery {
+    public function getTagsNews(): ActiveQuery
+    {
         return $this->hasMany(TagsNews::class, ['tags_id' => 'id']);
     }
 }

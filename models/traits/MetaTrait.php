@@ -6,8 +6,8 @@ use Yii;
 use yii\helpers\Url;
 use yii\web\Controller;
 
-trait MetaTrait {
-
+trait MetaTrait
+{
     /**
      * Установка мета тегов
      *
@@ -25,8 +25,7 @@ trait MetaTrait {
         string $description = null,
         string $image = null,
         string $type = 'website'
-    ): void
-    {
+    ): void {
         if ($title === null) {
             $title = Yii::$app->params['title'];
         }

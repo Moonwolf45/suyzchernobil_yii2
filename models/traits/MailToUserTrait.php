@@ -2,12 +2,11 @@
 
 namespace app\models\traits;
 
-
 use Yii;
 use yii\mail\MessageInterface;
 
-trait MailToUserTrait {
-
+trait MailToUserTrait
+{
     /**
      * Sends an email to the specified email address using the information collected by this model.
      *
@@ -20,22 +19,27 @@ trait MailToUserTrait {
      *
      * @return MessageInterface
      */
-    public function sendMailToUser(string $email, string $view, string $subject, array $params = [],
-                                   string $key_file = null): MessageInterface {
-		if (!empty($params)) {
-			foreach ($params as $key_p => $value_p) {
-				if ($key_p != $key_file) {
-					Yii::$app->mailer->getView()->params[$key_p] = $value_p;
-				}
-			}
-		}
+    public function sendMailToUser(
+        string $email,
+        string $view,
+        string $subject,
+        array $params = [],
+        string $key_file = null
+    ): MessageInterface {
+        if (!empty($params)) {
+            foreach ($params as $key_p => $value_p) {
+                if ($key_p != $key_file) {
+                    Yii::$app->mailer->getView()->params[$key_p] = $value_p;
+                }
+            }
+        }
 
         $result = Yii::$app->mailer->compose([
             'html' => 'views/' . $view . '-html',
             'text' => 'views/' . $view . '-text',
         ], $params);
-		
-		if ($key_file !== null && !empty($params[$key_file])) {
+
+        if ($key_file !== null && !empty($params[$key_file])) {
             foreach ($params[$key_file] as $file) {
                 $content_file = file_get_contents($file->tempName);
                 $result->attachContent($content_file, [
@@ -48,14 +52,14 @@ trait MailToUserTrait {
         $result->setSubject($subject);
         $result->send();
 
-		if (!empty($params)) {
-			foreach ($params as $key_p => $value_p) {
-				if ($key_p != $key_file) {
-					Yii::$app->mailer->getView()->params[$key_p] = null;
-				}
-			}
-		}
-		
+        if (!empty($params)) {
+            foreach (array_keys($params) as $key_p) {
+                if ($key_p != $key_file) {
+                    Yii::$app->mailer->getView()->params[$key_p] = null;
+                }
+            }
+        }
+
         return $result;
     }
 

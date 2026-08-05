@@ -2,10 +2,10 @@
 
 use app\models\Achievements;
 use yii\bootstrap5\LinkPager;
-use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 /** @var yii\web\View $this */
 /** @var yii\data\ActiveDataProvider $dataProvider */
@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'title',
             [
                 'attribute' => 'image',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Html::img('@web/' . $data->image, [
                         'style' => 'max-width: 400px; max-height: 400px; width: auto; height: auto;'
                     ]);
@@ -35,22 +35,22 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'file',
             [
                 'attribute' => 'fasten',
-                'value' => function($data) {
+                'value' => function ($data) {
                     return $data->fasten === 1 ? 'Да' : 'Нет';
                 }
             ], [
                 'attribute' => 'isPdf',
-                'value' => function($data) {
+                'value' => function ($data) {
                     return $data->isPdf === 1 ? 'Да' : 'Нет';
                 }
             ], [
                 'attribute' => 'created_at',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Yii::$app->formatter->asDate($data->created_at, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'updated_at',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Yii::$app->formatter->asDate($data->updated_at, 'php:d.m.Y H:i:s');
                 }
             ], [

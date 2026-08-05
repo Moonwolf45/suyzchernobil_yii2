@@ -2,31 +2,32 @@
 
 namespace app\modules\admin\controllers;
 
-
 use app\models\News;
 use app\models\NewsImage;
 use app\models\traits\UploadFilesTrait;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\web\UploadedFile;
-
 
 /**
  * NewsImageController implements the CRUD actions for NewsImage model.
  */
-class NewsImageController extends Controller {
+class NewsImageController extends Controller
+{
     use UploadFilesTrait;
 
     /**
      * @inheritDoc
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return array_merge(
-            parent::behaviors(), [
+            parent::behaviors(),
+            [
                 'verbs' => [
                     'class' => VerbFilter::class,
                     'actions' => [
@@ -42,7 +43,8 @@ class NewsImageController extends Controller {
      *
      * @return string
      */
-    public function actionIndex(): string {
+    public function actionIndex(): string
+    {
         $dataProvider = new ActiveDataProvider([
             'query' => NewsImage::find(),
             'pagination' => [
@@ -66,7 +68,8 @@ class NewsImageController extends Controller {
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView(int $id): string {
+    public function actionView(int $id): string
+    {
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
@@ -77,7 +80,8 @@ class NewsImageController extends Controller {
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|Response
      */
-    public function actionCreate(): Response|string {
+    public function actionCreate(): Response|string
+    {
         $news = News::find()->select(['id', 'title'])->asArray()->all();
         $model = new NewsImage();
 
@@ -112,7 +116,8 @@ class NewsImageController extends Controller {
      * @return string|Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate(int $id): Response|string {
+    public function actionUpdate(int $id): Response|string
+    {
         $news = News::find()->select(['id', 'title'])->asArray()->all();
         $model = $this->findModel($id);
 
@@ -148,7 +153,8 @@ class NewsImageController extends Controller {
      * @return Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete(int $id): Response {
+    public function actionDelete(int $id): Response
+    {
         $newsImage = NewsImage::findOne(['news_id' => $id]);
         $this->deleteImages($newsImage, 'image', 'one');
 
@@ -166,7 +172,8 @@ class NewsImageController extends Controller {
      * @return NewsImage the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel(int $id): NewsImage {
+    protected function findModel(int $id): NewsImage
+    {
         if (($model = NewsImage::findOne(['id' => $id])) !== null) {
             return $model;
         }

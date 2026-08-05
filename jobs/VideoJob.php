@@ -2,10 +2,10 @@
 
 namespace app\jobs;
 
+use app\models\NewsVideo;
 use Yii;
 use yii\base\BaseObject;
 use yii\queue\JobInterface;
-use app\models\NewsVideo;
 
 /**
  * Устаревший джоб получения информации о видео.

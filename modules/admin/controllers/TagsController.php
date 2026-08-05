@@ -2,25 +2,24 @@
 
 namespace app\modules\admin\controllers;
 
-
 use app\models\Tag;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
-
 
 /**
  * TagsController implements the CRUD actions for Tag model.
  */
-class TagsController extends Controller {
-
+class TagsController extends Controller
+{
     /**
      * @inheritDoc
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return array_merge(
             parent::behaviors(),
             [
@@ -39,7 +38,8 @@ class TagsController extends Controller {
      *
      * @return string
      */
-    public function actionIndex(): string {
+    public function actionIndex(): string
+    {
         $dataProvider = new ActiveDataProvider([
             'query' => Tag::find(),
             'pagination' => [
@@ -63,7 +63,8 @@ class TagsController extends Controller {
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView(int $id): string {
+    public function actionView(int $id): string
+    {
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
@@ -74,7 +75,8 @@ class TagsController extends Controller {
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
-    public function actionCreate(): Response|string {
+    public function actionCreate(): Response|string
+    {
         $model = new Tag();
 
         if ($this->request->isPost) {
@@ -112,7 +114,8 @@ class TagsController extends Controller {
      * @return string|Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate(int $id): Response|string {
+    public function actionUpdate(int $id): Response|string
+    {
         $model = $this->findModel($id);
 
         if ($this->request->isPost && $model->load($this->request->post())) {
@@ -138,7 +141,8 @@ class TagsController extends Controller {
      * @return Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete(int $id): Response {
+    public function actionDelete(int $id): Response
+    {
         if ($this->findModel($id)->delete() !== false) {
             Yii::$app->session->setFlash('tags', [['result' => 'success', 'value' => 'Тэг успешно удален']]);
         }
@@ -154,7 +158,8 @@ class TagsController extends Controller {
      * @return Tag the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel(int $id): Tag {
+    protected function findModel(int $id): Tag
+    {
         if (($model = Tag::findOne(['id' => $id])) !== null) {
             return $model;
         }

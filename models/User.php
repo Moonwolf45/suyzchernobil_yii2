@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-
 use Yii;
 use yii\base\Exception;
 use yii\behaviors\TimestampBehavior;
@@ -20,19 +19,21 @@ use yii\web\IdentityInterface;
  * @property string $auth_key
  * @property string $access_token
  */
-class User extends ActiveRecord implements IdentityInterface {
-
+class User extends ActiveRecord implements IdentityInterface
+{
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%users}}';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             [
                 'class' => TimestampBehavior::class,
@@ -47,14 +48,16 @@ class User extends ActiveRecord implements IdentityInterface {
     /**
      * {@inheritdoc}
      */
-    public static function findIdentity($id): User|IdentityInterface|null {
+    public static function findIdentity($id): User|IdentityInterface|null
+    {
         return static::findOne(['id' => $id]);
     }
 
     /**
      * {@inheritdoc}
      */
-    public static function findIdentityByAccessToken($token, $type = null): User|IdentityInterface|null {
+    public static function findIdentityByAccessToken($token, $type = null): User|IdentityInterface|null
+    {
         return static::findOne(['access_token' => $token]);
     }
 
@@ -65,28 +68,32 @@ class User extends ActiveRecord implements IdentityInterface {
      *
      * @return User|null
      */
-    public static function findByUsername(string $username): User|null {
+    public static function findByUsername(string $username): User|null
+    {
         return static::findOne(['username' => $username]);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getId(): int {
+    public function getId(): int
+    {
         return $this->id;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getAuthKey(): ?string {
+    public function getAuthKey(): ?string
+    {
         return $this->auth_key;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function validateAuthKey($authKey): ?bool {
+    public function validateAuthKey($authKey): ?bool
+    {
         return $this->getAuthKey() === $authKey;
     }
 
@@ -97,7 +104,8 @@ class User extends ActiveRecord implements IdentityInterface {
      *
      * @return bool if password provided is valid for current user
      */
-    public function validatePassword(string $password): bool {
+    public function validatePassword(string $password): bool
+    {
         return Yii::$app->security->validatePassword($password, $this->password);
     }
 
@@ -112,7 +120,8 @@ class User extends ActiveRecord implements IdentityInterface {
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['username', 'password'], 'required'],
             ['username', 'unique'],
@@ -124,7 +133,8 @@ class User extends ActiveRecord implements IdentityInterface {
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'id' => 'ID',
             'username' => 'Логин',

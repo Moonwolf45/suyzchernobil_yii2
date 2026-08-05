@@ -2,27 +2,28 @@
 
 namespace app\modules\admin\controllers;
 
-
 use app\jobs\VideoJob;
 use app\models\NewsVideo;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
-
 
 /**
  * NewsVideoController implements the CRUD actions for NewsVideo model.
  */
-class NewsVideoController extends Controller {
+class NewsVideoController extends Controller
+{
     /**
      * @inheritDoc
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return array_merge(
-            parent::behaviors(), [
+            parent::behaviors(),
+            [
                 'verbs' => [
                     'class' => VerbFilter::class,
                     'actions' => [
@@ -38,7 +39,8 @@ class NewsVideoController extends Controller {
      *
      * @return string
      */
-    public function actionIndex(): string {
+    public function actionIndex(): string
+    {
         $dataProvider = new ActiveDataProvider([
             'query' => NewsVideo::find(),
             'pagination' => [
@@ -62,7 +64,8 @@ class NewsVideoController extends Controller {
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView(int $id): string {
+    public function actionView(int $id): string
+    {
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
@@ -73,7 +76,8 @@ class NewsVideoController extends Controller {
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|Response
      */
-    public function actionCreate(): Response|string {
+    public function actionCreate(): Response|string
+    {
         $model = new NewsVideo();
 
         if ($this->request->isPost) {
@@ -104,7 +108,8 @@ class NewsVideoController extends Controller {
      * @return string|Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate(int $id): Response|string {
+    public function actionUpdate(int $id): Response|string
+    {
         $model = $this->findModel($id);
 
         if ($this->request->isPost && $model->load($this->request->post())) {
@@ -132,7 +137,8 @@ class NewsVideoController extends Controller {
      * @return Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete(int $id): Response {
+    public function actionDelete(int $id): Response
+    {
         if ($this->findModel($id)->delete() !== false) {
             Yii::$app->session->setFlash('news-video', [['result' => 'success', 'value' => 'Видео-новость успешно удалена']]);
         }
@@ -148,7 +154,8 @@ class NewsVideoController extends Controller {
      * @return NewsVideo the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel(int $id): NewsVideo {
+    protected function findModel(int $id): NewsVideo
+    {
         if (($model = NewsVideo::findOne(['id' => $id])) !== null) {
             return $model;
         }

@@ -7,9 +7,10 @@ use Yii;
 use yii\bootstrap5\Widget;
 use yii\caching\DbDependency;
 
-class LastModifiedNewsWidget extends Widget {
-
-    public function run() {
+class LastModifiedNewsWidget extends Widget
+{
+    public function run()
+    {
         $dep = new DbDependency(['sql' => 'SELECT MAX(updated_at) FROM ' . News::tableName()]);
 
         $news = Yii::$app->cache->getOrSet(['last_modified_news_widget'], function () {

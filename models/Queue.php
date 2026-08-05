@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use Yii;
 use yii\db\ActiveRecord;
 
 /**
@@ -19,19 +18,21 @@ use yii\db\ActiveRecord;
  * @property int|null $attempt
  * @property int|null $done_at
  */
-class Queue extends ActiveRecord {
-
+class Queue extends ActiveRecord
+{
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%queue}}';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['channel', 'job', 'pushed_at', 'ttr'], 'required'],
             [['job'], 'string'],
@@ -43,7 +44,8 @@ class Queue extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'id' => 'ID',
             'channel' => 'Channel',

@@ -9,18 +9,18 @@ use Yii;
 use yii\web\Controller;
 use yii\web\Response;
 
+class SitemapController extends Controller
+{
+    public const ALWAYS = 'always';
+    public const HOURLY = 'hourly';
+    public const DAILY = 'daily';
+    public const WEEKLY = 'weekly';
+    public const MONTHLY = 'monthly';
+    public const YEARLY = 'yearly';
+    public const NEVER = 'never';
 
-class SitemapController extends Controller {
-
-    const ALWAYS = 'always';
-    const HOURLY = 'hourly';
-    const DAILY = 'daily';
-    const WEEKLY = 'weekly';
-    const MONTHLY = 'monthly';
-    const YEARLY = 'yearly';
-    const NEVER = 'never';
-
-    public function actionIndex(): string {
+    public function actionIndex(): string
+    {
         if (!$items = Yii::$app->cache->get('sitemap')) {
             $categories = Category::find()->all();
             $tags = Tag::find()->all();
@@ -31,13 +31,15 @@ class SitemapController extends Controller {
                     'models' => $categories,
                     'changefreq' => self::WEEKLY,
                     'priority' => 0.2,
-                ], [
+                ],
+                [
                     [
                         'models' => $tags,
                         'changefreq' => self::WEEKLY,
                         'priority' => 0.5,
                     ]
-                ], [
+                ],
+                [
                     [
                         'models' => $news,
                         'changefreq' => self::DAILY,

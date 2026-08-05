@@ -2,7 +2,6 @@
 
 namespace app\jobs;
 
-
 use app\models\News;
 use Yii;
 use yii\httpclient\Client;
@@ -267,7 +266,7 @@ class VkPublishJob extends SocialPublishJob
     private function uploadPhotoViaCurl(string $uploadUrl, string $filePath, int $index): ?array
     {
         $ch = curl_init();
-        
+
         curl_setopt_array($ch, [
             CURLOPT_URL => $uploadUrl,
             CURLOPT_RETURNTRANSFER => true,
@@ -286,7 +285,7 @@ class VkPublishJob extends SocialPublishJob
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
-        
+
         curl_close($ch);
 
         if ($error) {
@@ -354,7 +353,7 @@ class VkPublishJob extends SocialPublishJob
         }
 
         $uploadUrl = $response->data['response']['upload_url'] ?? null;
-        
+
         if ($uploadUrl) {
             self::$uploadUrlCache = $uploadUrl;
         }

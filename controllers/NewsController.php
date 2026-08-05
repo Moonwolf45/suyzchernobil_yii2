@@ -4,7 +4,9 @@ namespace app\controllers;
 
 use app\models\Achievements;
 use app\models\Category;
+use app\models\ContactForm;
 use app\models\Documents;
+use app\models\LoginForm;
 use app\models\News;
 use app\models\NewsVideo;
 use app\models\SearchForm;
@@ -14,20 +16,20 @@ use app\models\traits\MetaTrait;
 use Yii;
 use yii\data\Pagination;
 use yii\db\Exception;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\Response;
-use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
 
-class NewsController extends Controller {
+class NewsController extends Controller
+{
     use MetaTrait;
     use MailToUserTrait;
 
     /**
      * {@inheritdoc}
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             'verbs' => [
                 'class' => VerbFilter::class,
@@ -41,7 +43,8 @@ class NewsController extends Controller {
     /**
      * {@inheritdoc}
      */
-    public function actions(): array {
+    public function actions(): array
+    {
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
@@ -54,7 +57,8 @@ class NewsController extends Controller {
      *
      * @return string
      */
-    public function actionIndex(): string {
+    public function actionIndex(): string
+    {
         $this->setMeta($this);
 
         $news = News::find()->joinWith(['category'])->orderBy([News::tableName() . '.id' => SORT_DESC])->limit(10)
@@ -69,7 +73,8 @@ class NewsController extends Controller {
      *
      * @return string
      */
-    public function actionSearch($q = null, int $page = 1): string {
+    public function actionSearch($q = null, int $page = 1): string
+    {
         $news = [];
         $pages = [];
 
@@ -97,7 +102,8 @@ class NewsController extends Controller {
      *
      * @throws Exception
      */
-    public function actionView(string $alias): string {
+    public function actionView(string $alias): string
+    {
         $news = News::find()->joinWith(['category', 'newsImages', 'tags'])->where([News::tableName() . '.slug' => $alias])->one();
         $news->views += 1;
         $news->twisted_views += rand(5, 15);
@@ -113,7 +119,8 @@ class NewsController extends Controller {
      *
      * @return string
      */
-    public function actionArchive(int $page = 1): string {
+    public function actionArchive(int $page = 1): string
+    {
         $categories = Category::find()->orderBy([Category::tableName() . '.title' => SORT_ASC])->asArray()->all();
 
         $query = News::find()->joinWith(['category']);
@@ -132,7 +139,8 @@ class NewsController extends Controller {
      *
      * @return string
      */
-    public function actionVideos(int $page = 1): string {
+    public function actionVideos(int $page = 1): string
+    {
         $query = NewsVideo::find();
         $countQuery = clone $query;
         $pages = new Pagination(['defaultPageSize' => 5, 'totalCount' => $countQuery->count()]);
@@ -148,7 +156,8 @@ class NewsController extends Controller {
      *
      * @return string
      */
-    public function actionDocuments(): string {
+    public function actionDocuments(): string
+    {
         $this->setMeta($this, null, 'Регистрационные документы, устав, нормативно-правовые и законодательные базы, сертификаты');
 
         $documents = Documents::find()->where(['type' => Documents::DOCUMENT_TYPE_BOOK_OF_MEMORY])
@@ -162,7 +171,8 @@ class NewsController extends Controller {
      *
      * @return string
      */
-    public function actionTheSovietUnionLastBattle(): string {
+    public function actionTheSovietUnionLastBattle(): string
+    {
         $this->setMeta($this, null, 'Регистрационные документы, устав, нормативно-правовые и законодательные базы, сертификаты');
 
         $documents = Documents::find()->where(['type' => Documents::DOCUMENT_TYPE_SOVIET_UNION_LAST_BATTLE])
@@ -176,7 +186,8 @@ class NewsController extends Controller {
      *
      * @return string
      */
-    public function actionOurAchievements(): string {
+    public function actionOurAchievements(): string
+    {
         $this->setMeta($this, null, 'Успехи, достижения, награды');
 
         $ourAchievements = Achievements::find()->orderBy([Achievements::tableName() . '.fasten' => SORT_DESC,
@@ -190,12 +201,17 @@ class NewsController extends Controller {
      *
      * @return Response|string
      */
-    public function actionContact(): Response|string {
+    public function actionContact(): Response|string
+    {
         $model = new ContactForm();
 
         if ($model->load(Yii::$app->request->post())) {
-            $this->sendMailToUser(Yii::$app->params['adminEmail'],
-                'contact', $model->subject, ['name' => $model->name, 'email' => $model->email, 'body' => $model->body]);
+            $this->sendMailToUser(
+                Yii::$app->params['adminEmail'],
+                'contact',
+                $model->subject,
+                ['name' => $model->name, 'email' => $model->email, 'body' => $model->body]
+            );
 
             Yii::$app->session->setFlash('contact', [['result' => 'success', 'value' => 'Письмо успешно отправлено']]);
 
@@ -212,7 +228,8 @@ class NewsController extends Controller {
      *
      * @return Response|string
      */
-    public function actionLogin(): Response|string {
+    public function actionLogin(): Response|string
+    {
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
@@ -233,7 +250,8 @@ class NewsController extends Controller {
      *
      * @return Response
      */
-    public function actionLogout(): Response {
+    public function actionLogout(): Response
+    {
         Yii::$app->user->logout();
 
         return $this->goHome();
@@ -244,7 +262,8 @@ class NewsController extends Controller {
      *
      * @throws Exception
      */
-    public function actionSubscribe(): Response {
+    public function actionSubscribe(): Response
+    {
         $postSubscribe = Yii::$app->request->post();
 
         $subscribe = Subscribes::find()->where(['email' => $postSubscribe['email']])->asArray()->one();

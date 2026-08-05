@@ -2,7 +2,6 @@
 
 namespace app\modules\admin\controllers;
 
-
 use app\jobs\OkPublishJob;
 use app\jobs\VkPublishJob;
 use app\models\Category;
@@ -15,24 +14,26 @@ use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
+use yii\web\Controller;
 use yii\web\Response;
 use yii\web\UploadedFile;
-
 
 /**
  * NewsController implements the CRUD actions for News model.
  */
-class NewsController extends Controller {
+class NewsController extends Controller
+{
     use UploadFilesTrait;
 
     /**
      * @inheritDoc
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return array_merge(
-            parent::behaviors(), [
+            parent::behaviors(),
+            [
                 'verbs' => [
                     'class' => VerbFilter::class,
                     'actions' => [
@@ -48,7 +49,8 @@ class NewsController extends Controller {
      *
      * @return string
      */
-    public function actionIndex(): string {
+    public function actionIndex(): string
+    {
         $dataProvider = new ActiveDataProvider([
             'query' => News::find()->joinWith(['category', 'tags'])->groupBy([News::tableName() . '.id']),
             'pagination' => [
@@ -72,7 +74,8 @@ class NewsController extends Controller {
      *
      * @return string
      */
-    public function actionView(int $id): string {
+    public function actionView(int $id): string
+    {
         $news = News::find()->joinWith(['category', 'tags'])->where([News::tableName() . '.id' => $id])->one();
 
         $gallery = new ActiveDataProvider([
@@ -95,7 +98,8 @@ class NewsController extends Controller {
      * @return string|Response
      * @throws Exception|\ImagickException
      */
-    public function actionCreate(): Response|string {
+    public function actionCreate(): Response|string
+    {
         $categories = Category::find()->asArray()->all();
         $tags = Tag::find()->indexBy('id')->all();
         $model = new News();
@@ -173,7 +177,8 @@ class NewsController extends Controller {
      * @throws Exception
      * @throws StaleObjectException
      */
-    public function actionUpdate(int $id): Response|string {
+    public function actionUpdate(int $id): Response|string
+    {
         $categories = Category::find()->asArray()->all();
         $tags = Tag::find()->indexBy('id')->all();
         $gallery = NewsImage::find()->where(['news_id' => $id])->asArray()->all();
@@ -256,7 +261,8 @@ class NewsController extends Controller {
      * @return false|string
      * @throws \Throwable
      */
-    public function actionDeleteImages($id_model, $image): bool|string {
+    public function actionDeleteImages($id_model, $image): bool|string
+    {
         $news_image = NewsImage::find()->where(['id' => $image, 'news_id' => $id_model])->one();
 
         try {
@@ -285,7 +291,8 @@ class NewsController extends Controller {
      * @throws StaleObjectException
      * @throws \Throwable
      */
-    public function actionDelete(int $id): Response {
+    public function actionDelete(int $id): Response
+    {
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $news = News::find()->where(['id' => $id])->one();
@@ -307,7 +314,8 @@ class NewsController extends Controller {
         return $this->redirect(['index']);
     }
 
-    public function actionPublish(int $id): Response {
+    public function actionPublish(int $id): Response
+    {
         Yii::$app->queue->push(new VkPublishJob(['news_id' => $id]));
         Yii::$app->queue->push(new OkPublishJob(['news_id' => $id]));
 
@@ -317,7 +325,8 @@ class NewsController extends Controller {
         return $this->redirect(['index']);
     }
 
-    public function actionRetryVkPublish(int $id): Response {
+    public function actionRetryVkPublish(int $id): Response
+    {
         Yii::$app->queue->push(new VkPublishJob(['news_id' => $id]));
 
         Yii::$app->session->setFlash('news', [['result' => 'success', 'value' => 'Новость поставлена в очередь на публикацию, 
@@ -326,7 +335,8 @@ class NewsController extends Controller {
         return $this->redirect(['index']);
     }
 
-    public function actionRetryOkPublish(int $id): Response {
+    public function actionRetryOkPublish(int $id): Response
+    {
         Yii::$app->queue->push(new OkPublishJob(['news_id' => $id]));
 
         Yii::$app->session->setFlash('news', [['result' => 'success', 'value' => 'Новость поставлена в очередь на публикацию, 

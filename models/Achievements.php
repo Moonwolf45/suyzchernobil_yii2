@@ -19,22 +19,24 @@ use yii\db\ActiveRecord;
  * @property int $created_at
  * @property int $updated_at
  */
-class Achievements extends ActiveRecord {
-
-    const SCENARIO_INSERT = 'insert';
-    const SCENARIO_UPDATE = 'update';
+class Achievements extends ActiveRecord
+{
+    public const SCENARIO_INSERT = 'insert';
+    public const SCENARIO_UPDATE = 'update';
 
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%achievements}}';
     }
 
     /**
      * @return array
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             [
                 'class' => TimestampBehavior::class,
@@ -52,7 +54,8 @@ class Achievements extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['title', 'file'], 'required', 'on' => self::SCENARIO_INSERT],
             [['title'], 'required', 'on' => self::SCENARIO_UPDATE],
@@ -62,16 +65,21 @@ class Achievements extends ActiveRecord {
             [['image'], 'file', 'extensions' => Yii::$app->params['extensionsImage'],
                 'mimeTypes' => Yii::$app->params['mimeTypesImage'], 'maxSize' => 1024 * 1024 * 10],
 
-            [['file'], 'file', 'extensions' => array_merge(Yii::$app->params['extensionsImage'],
-                Yii::$app->params['extensionsDocuments']), 'mimeTypes' => array_merge(Yii::$app->params['mimeTypesImage'],
-                Yii::$app->params['mimeTypesDocuments']), 'maxSize' => 1024 * 1024 * 25],
+            [['file'], 'file', 'extensions' => array_merge(
+                Yii::$app->params['extensionsImage'],
+                Yii::$app->params['extensionsDocuments']
+            ), 'mimeTypes' => array_merge(
+                Yii::$app->params['mimeTypesImage'],
+                Yii::$app->params['mimeTypesDocuments']
+            ), 'maxSize' => 1024 * 1024 * 25],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'id' => 'ID',
             'title' => 'Название',

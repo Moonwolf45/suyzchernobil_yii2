@@ -36,12 +36,12 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
     /**
      * @return string Поле для отметки времени публикации (например 'published_at_vk')
      */
-    protected abstract function getPublishedAtField(): string;
+    abstract protected function getPublishedAtField(): string;
 
     /**
      * @return string Название соцсети для логирования
      */
-    protected abstract function getSocialNetworkName(): string;
+    abstract protected function getSocialNetworkName(): string;
 
     /**
      * @param Client $client
@@ -51,7 +51,7 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
      *
      * @return bool Успешно ли выполнена публикация
      */
-    protected abstract function publish(Client $client, News $news, int &$uploadedImagesCount = 0, int &$failedImagesCount = 0): bool;
+    abstract protected function publish(Client $client, News $news, int &$uploadedImagesCount = 0, int &$failedImagesCount = 0): bool;
 
     /**
      * @param Client $client
@@ -59,7 +59,7 @@ abstract class SocialPublishJob extends BaseObject implements JobInterface
      *
      * @return array Массив загруженных изображений (формат зависит от соцсети)
      */
-    protected abstract function uploadImages(Client $client, array $images): array;
+    abstract protected function uploadImages(Client $client, array $images): array;
 
     /**
      * @inheritdoc

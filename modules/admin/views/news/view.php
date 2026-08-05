@@ -47,13 +47,13 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'meta_description',
             [
                 'attribute' => 'category_id',
-                'value' => function($data) {
+                'value' => function ($data) {
                     return $data->category->title;
                 }
             ], [
                 'attribute' => 'tags',
                 'format' => ['html'],
-                'value' => function($data) {
+                'value' => function ($data) {
                     $tags = '';
                     if (!empty($data->tags)) {
                         foreach ($data->tags as $tag) {
@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             ], [
                 'attribute' => 'image',
                 'format' => ['html'],
-                'value' => function($data) {
+                'value' => function ($data) {
                     return Html::img('@web/' . $data->image, [
                         'style' => 'max-width: 400px; max-height: 400px; width: auto; height: auto;'
                     ]);
@@ -77,22 +77,22 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'twisted_views',
             [
                 'attribute' => 'created_at',
-                'value' => function($data) {
+                'value' => function ($data) {
                     return Yii::$app->formatter->asDate($data->created_at, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'updated_at',
-                'value' => function($data) {
+                'value' => function ($data) {
                     return Yii::$app->formatter->asDate($data->updated_at, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'published_at_vk',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Yii::$app->formatter->asDate($data->published_at_vk, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'published_at_ok',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Yii::$app->formatter->asDate($data->published_at_ok, 'php:d.m.Y H:i:s');
                 }
             ]
@@ -105,12 +105,12 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'id',
             [
                 'attribute' => 'news_id',
-                'content' => function() use ($model) {
+                'content' => function () use ($model) {
                     return $model->title;
                 }
             ], [
                 'attribute' => 'image',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Html::img('@web/' . $data->image, ['style' => 'max-width: 400px; max-height: 400px; width: auto; height: auto;']);
                 }
             ], [

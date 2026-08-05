@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'video',
             [
                 'attribute' => 'preview_image',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Html::img('@web/' . $data->preview_image, [
                         'style' => 'max-width: 400px; max-height: 400px; width: auto; height: auto;'
                     ]);
@@ -44,12 +44,12 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'twisted_views',
             [
                 'attribute' => 'created_at',
-                'value' => function($data) {
+                'value' => function ($data) {
                     return Yii::$app->formatter->asDate($data->created_at, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'updated_at',
-                'value' => function($data) {
+                'value' => function ($data) {
                     return Yii::$app->formatter->asDate($data->updated_at, 'php:d.m.Y H:i:s');
                 }
             ]

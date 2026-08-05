@@ -1,7 +1,7 @@
 <?php
 
-use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
+use yii\helpers\Html;
 
 /** @var yii\web\View $this */
 /** @var app\models\NewsVideo $model */

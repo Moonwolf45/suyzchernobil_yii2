@@ -20,15 +20,15 @@ use yii\db\ActiveRecord;
  * @property int $created_at
  * @property int $updated_at
  */
-class Documents extends ActiveRecord {
+class Documents extends ActiveRecord
+{
+    public const SCENARIO_INSERT = 'insert';
+    public const SCENARIO_UPDATE = 'update';
 
-    const SCENARIO_INSERT = 'insert';
-    const SCENARIO_UPDATE = 'update';
+    public const DOCUMENT_TYPE_BOOK_OF_MEMORY = 'book_of_memory';
+    public const DOCUMENT_TYPE_SOVIET_UNION_LAST_BATTLE = 'the_soviet_union_last_battle';
 
-    const DOCUMENT_TYPE_BOOK_OF_MEMORY = 'book_of_memory';
-    const DOCUMENT_TYPE_SOVIET_UNION_LAST_BATTLE = 'the_soviet_union_last_battle';
-
-    const DOCUMENT_TYPES = [
+    public const DOCUMENT_TYPES = [
         self::DOCUMENT_TYPE_BOOK_OF_MEMORY => 'Книга памяти',
         self::DOCUMENT_TYPE_SOVIET_UNION_LAST_BATTLE => 'Последняя битва Советского Союза'
     ];
@@ -36,14 +36,16 @@ class Documents extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string {
+    public static function tableName(): string
+    {
         return '{{%documents}}';
     }
 
     /**
      * @return array
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             [
                 'class' => TimestampBehavior::class,
@@ -61,7 +63,8 @@ class Documents extends ActiveRecord {
     /**
      * {@inheritdoc}
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [
             [['title', 'file'], 'required', 'on' => self::SCENARIO_INSERT],
             [['title'], 'required', 'on' => self::SCENARIO_UPDATE],
@@ -71,16 +74,21 @@ class Documents extends ActiveRecord {
             [['image'], 'file', 'extensions' => Yii::$app->params['extensionsImage'],
                 'mimeTypes' => Yii::$app->params['mimeTypesImage'], 'maxSize' => 1024 * 1024 * 10],
 
-            [['file'], 'file', 'extensions' => array_merge(Yii::$app->params['extensionsImage'],
-                Yii::$app->params['extensionsDocuments']), 'mimeTypes' => array_merge(Yii::$app->params['mimeTypesImage'],
-                Yii::$app->params['mimeTypesDocuments']), 'maxSize' => 1024 * 1024 * 25],
+            [['file'], 'file', 'extensions' => array_merge(
+                Yii::$app->params['extensionsImage'],
+                Yii::$app->params['extensionsDocuments']
+            ), 'mimeTypes' => array_merge(
+                Yii::$app->params['mimeTypesImage'],
+                Yii::$app->params['mimeTypesDocuments']
+            ), 'maxSize' => 1024 * 1024 * 25],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array {
+    public function attributeLabels(): array
+    {
         return [
             'id' => 'ID',
             'title' => 'Название',

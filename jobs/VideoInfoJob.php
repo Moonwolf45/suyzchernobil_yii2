@@ -33,20 +33,20 @@ abstract class VideoInfoJob extends BaseObject implements JobInterface
     /**
      * @return string Название источника видео (YouTube, VK и т.д.)
      */
-    protected abstract function getSourceName(): string;
+    abstract protected function getSourceName(): string;
 
     /**
      * @param string $videoUrl URL видео
      * @return array|null Данные видео (preview_image, duration) или null если не распознан
      */
-    protected abstract function parseVideoUrl(string $videoUrl): ?array;
+    abstract protected function parseVideoUrl(string $videoUrl): ?array;
 
     /**
      * @param Client $client
      * @param array $videoData Распознанные данные видео
      * @return array|null Информация о видео из API или null при ошибке
      */
-    protected abstract function fetchVideoInfo(Client $client, array $videoData): ?array;
+    abstract protected function fetchVideoInfo(Client $client, array $videoData): ?array;
 
     /**
      * @inheritdoc

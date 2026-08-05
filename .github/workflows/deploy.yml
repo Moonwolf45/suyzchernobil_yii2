@@ -15,14 +15,63 @@ env:
 
 jobs:
   # ============================================
-  # СБОРКА И ДЕПЛОЙ
+  # СТАДИЯ ПРОГРАММНЫХ ПРОВЕРОК (CI)
+  # ============================================
+  lint_and_test:
+    name: 🔍 Lint & Static Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, gd, curl, imagick, pdo_mysql, exif
+          tools: composer:v${{ env.COMPOSER_VERSION }}
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: |
+          composer install --prefer-dist --no-progress --no-suggest
+
+      - name: 1. Проверка синтаксиса PHP (lint)
+        run: |
+          echo "Проверка синтаксиса PHP файлов..."
+          find . -name "*.php" -not -path "./vendor/*" -not -path "./runtime/*" -not -path "./web/assets/*" | xargs -n1 -P4 php -l
+
+      - name: 2. Проверка стиля кода (PHP-CS-Fixer)
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+
+      - name: 3. Контроль архитектуры (Deptrac)
+        run: vendor/bin/deptrac
+
+      - name: 4. Запуск PHPStan
+        run: vendor/bin/phpstan analyse --level=5
+
+      - name: 5. Запуск Psalm
+        run: vendor/bin/psalm --no-progress
+
+  # ============================================
+  # СБОРКА И ДЕПЛОЙ (CD)
   # ============================================
   deploy:
     name: 🚀 Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: production
-    
+    needs: lint_and_test # Запускается ТОЛЬКО если lint_and_test завершился успешно
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,19 +86,17 @@ jobs:
           tools: composer:v${{ env.COMPOSER_VERSION }}
           coverage: none
 
-      - name: Install dependencies
-        run: |
-          composer update --prefer-dist --optimize-autoloader
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
-      - name: Проверка синтаксиса PHP (lint)
+      # Используем production-оптимизации, отключая dev-зависимости для сервера
+      - name: Install production dependencies
         run: |
-          echo "Проверка синтаксиса PHP файлов..."
-          find . -name "*.php" -not -path "./vendor/*" -not -path "./runtime/*" -not -path "./web/assets/*" | xargs -n1 -P4 php -l
-          echo "✅ Все файлы прошли проверку"
-
-      - name: Запуск PHPStan
-        run: |
-          vendor/bin/phpstan analyse --level=5
+          composer install --no-dev --prefer-dist --optimize-autoloader
 
       - name: Настройка прав доступа
         run: |

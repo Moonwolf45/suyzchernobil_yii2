@@ -4,20 +4,23 @@ namespace app\modules\admin\controllers;
 
 use app\models\User;
 use yii\data\ActiveDataProvider;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 
 /**
  * UsersController implements the CRUD actions for User model.
  */
-class UsersController extends Controller {
+class UsersController extends Controller
+{
     /**
      * @inheritDoc
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return array_merge(
-            parent::behaviors(), [
+            parent::behaviors(),
+            [
                 'verbs' => [
                     'class' => VerbFilter::class,
                     'actions' => [
@@ -33,7 +36,8 @@ class UsersController extends Controller {
      *
      * @return string
      */
-    public function actionIndex(): string {
+    public function actionIndex(): string
+    {
         $dataProvider = new ActiveDataProvider([
             'query' => User::find(),
             'pagination' => [
@@ -57,7 +61,8 @@ class UsersController extends Controller {
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView(int $id): string {
+    public function actionView(int $id): string
+    {
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
@@ -68,7 +73,8 @@ class UsersController extends Controller {
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
-    public function actionCreate(): \yii\web\Response|string {
+    public function actionCreate(): \yii\web\Response|string
+    {
         $model = new User();
 
         if ($this->request->isPost) {
@@ -92,7 +98,8 @@ class UsersController extends Controller {
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate(int $id): \yii\web\Response|string {
+    public function actionUpdate(int $id): \yii\web\Response|string
+    {
         $model = $this->findModel($id);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -112,7 +119,8 @@ class UsersController extends Controller {
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete(int $id): \yii\web\Response {
+    public function actionDelete(int $id): \yii\web\Response
+    {
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
@@ -126,7 +134,8 @@ class UsersController extends Controller {
      * @return User the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel(int $id): User {
+    protected function findModel(int $id): User
+    {
         if (($model = User::findOne(['id' => $id])) !== null) {
             return $model;
         }

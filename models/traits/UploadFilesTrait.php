@@ -2,13 +2,12 @@
 
 namespace app\models\traits;
 
-
 use Yii;
 use yii\helpers\Inflector;
 use yii\imagine\Image;
 
-trait UploadFilesTrait {
-
+trait UploadFilesTrait
+{
     protected string $tempDirectory;
     protected string $directory;
 
@@ -25,12 +24,13 @@ trait UploadFilesTrait {
      * @param string $rootDirectory
      * @param string $path_to_file
      */
-    protected function createDirectory(string $path_to_file, string $rootDirectory = 'uploads'): void {
+    protected function createDirectory(string $path_to_file, string $rootDirectory = 'uploads'): void
+    {
         if (file_exists($rootDirectory)) {
             if (!file_exists($rootDirectory . '/temp_files')) {
                 mkdir($rootDirectory . '/temp_files', 0755);
             }
-            
+
             if (!file_exists($rootDirectory . '/' . $path_to_file)) {
                 mkdir($rootDirectory . '/' . $path_to_file, 0755);
             }
@@ -55,13 +55,21 @@ trait UploadFilesTrait {
      *
      * @return bool|string
      */
-    protected function uploadImage($model_name, $field, string $path_to_file = 'undefined', bool $createThumbnail = true,
-                                   string $oldFile = null): bool|string {
+    protected function uploadImage(
+        $model_name,
+        $field,
+        string $path_to_file = 'undefined',
+        bool $createThumbnail = true,
+        string $oldFile = null
+    ): bool|string {
         $this->createDirectory($path_to_file);
 
         if ($model_name->validate()) {
-            $name_image = preg_replace('/\s+/', '_',
-                    Inflector::transliterate($model_name->$field->baseName)) . '.' . $model_name->$field->extension;
+            $name_image = preg_replace(
+                '/\s+/',
+                '_',
+                Inflector::transliterate($model_name->$field->baseName)
+            ) . '.' . $model_name->$field->extension;
 
             if (in_array($model_name->$field->type, Yii::$app->params['mimeTypesImage'])) {
                 $model_name->$field->saveAs($this->tempDirectory . '/' . $name_image);
@@ -93,7 +101,8 @@ trait UploadFilesTrait {
      * @return array|bool
      * @throws \ImagickException
      */
-    protected function uploadGallery($model_name, $field, string $path_to_file = 'undefined'): bool|array {
+    protected function uploadGallery($model_name, $field, string $path_to_file = 'undefined'): bool|array
+    {
         $this->createDirectory($path_to_file);
 
         $arrFile = [];
@@ -109,8 +118,11 @@ trait UploadFilesTrait {
 
                     $arrFile[$key]['type'] = 0;
                 } else {
-                    $path = 'uploads/' . $path_to_file . '/' . preg_replace('/\s+/', '_',
-                            Inflector::transliterate($file->baseName)) . '.' . $file->extension;
+                    $path = 'uploads/' . $path_to_file . '/' . preg_replace(
+                        '/\s+/',
+                        '_',
+                        Inflector::transliterate($file->baseName)
+                    ) . '.' . $file->extension;
                     $file->saveAs($path);
 
                     $arrFile[$key]['type'] = 1;
@@ -125,8 +137,8 @@ trait UploadFilesTrait {
             return false;
         }
     }
-	
-	/**
+
+    /**
      * Функция удаления файлов
      *
      * @param $model_name
@@ -136,7 +148,8 @@ trait UploadFilesTrait {
      *
      * @return bool|string
      */
-    protected function deleteImages($model_name, $field, string $type_model = 'array'): bool|string {
+    protected function deleteImages($model_name, $field, string $type_model = 'array'): bool|string
+    {
         if ($type_model === 'array') {
             if (!empty($model_name->$field)) {
                 foreach ($model_name->$field as $file) {
@@ -177,7 +190,8 @@ trait UploadFilesTrait {
      *
      * @return string
      */
-    protected function treatmentImage($name_image, bool $createThumbnail = false): string {
+    protected function treatmentImage($name_image, bool $createThumbnail = false): string
+    {
         $tempNameFile = $this->tempDirectory . '/' . $name_image;
         $randTempNameFile = $this->tempDirectory . '/' . time() . '_' . $name_image;
         $path = $this->directory . '/' . $name_image;

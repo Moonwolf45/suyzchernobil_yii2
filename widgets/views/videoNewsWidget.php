@@ -1,5 +1,5 @@
 <?php
-
+/** @var yii\web\View $this */
 /** @var app\models\NewsVideo $videoNews */
 
 use yii\helpers\Html;
@@ -17,15 +17,20 @@ use yii\helpers\Url;
             <div>
                 <div class="owl-carousel owl-theme" id="videoNews">
                     <?php foreach ($videoNews as $video): ?>
-                        <div class="item px-2" itemscope itemprop="VideoObject" itemtype="https://schema.org/VideoObject">
+                        <?php
+                            // Формируем абсолютный URL для превью, если он относительный
+                            $thumbUrl = Url::to($video['preview_image'], true);
+                        ?>
+                        <div class="item px-2" itemscope itemtype="https://schema.org/VideoObject">
                             <div class="fh5co_hover_news_img">
                                 <div class="fh5co_hover_news_img_video_tag_position_relative">
                                     <div class="fh5co_news_img"></div>
                                     <div class="fh5co_hover_news_img_video_tag_position_absolute fh5co_hide_<?= $video['id']; ?>">
-                                        <?= Html::img($video['preview_image']); ?>
+                                        <!-- Добавлен itemprop="thumbnail" для тега картинки -->
+                                        <?= Html::img($thumbUrl, ['itemprop' => 'thumbnail']); ?>
                                     </div>
                                     <a class="fh5co_hover_news_img_video_tag_position_absolute_1" data-fancybox
-                                        data-type="iframe" data-src="<?= $video['video']; ?>" href="javascript:;">
+                                       data-type="iframe" data-src="<?= Url::to($video['video'], true); ?>" href="javascript:;">
                                         <div class="fh5co_hover_news_img_video_tag_position_absolute_1_play_button_1">
                                             <div class="fh5co_hover_news_img_video_tag_position_absolute_1_play_button">
                                                 <span><i class="fa fa-play"></i></span>
@@ -34,9 +39,9 @@ use yii\helpers\Url;
                                     </a>
                                 </div>
                                 <div class="pt-2">
-                                    <a data-fancybox data-type="iframe" data-src="<?= $video['video']; ?>"
-                                        class="d-block fh5co_small_post_heading fh5co_small_post_heading_1" href="javascript:;">
-                                        <span itemprop="name"><?= $video['title']; ?></span>
+                                    <a data-fancybox data-type="iframe" data-src="<?= Url::to($video['video'], true); ?>"
+                                       class="d-block fh5co_small_post_heading fh5co_small_post_heading_1" href="javascript:;">
+                                        <span itemprop="name"><?= Html::encode($video['title']); ?></span>
                                     </a>
                                     <div class="c_g">
                                         <i class="fa fa-clock-o"></i>
@@ -44,11 +49,20 @@ use yii\helpers\Url;
                                     </div>
                                 </div>
                             </div>
-                            <link itemprop="embedUrl" href="<?= $video['video']; ?>" />
-                            <meta itemprop="contentUrl" content="<?= $video['video']; ?>" />
-                            <meta itemprop="thumbnailUrl" content="<?= $video['preview_image']; ?>" />
+
+                            <!-- Метаданные для поисковых роботов -->
+                            <link itemprop="embedUrl" href="<?= Url::to($video['video'], true); ?>" />
+                            <meta itemprop="contentUrl" content="<?= Url::to($video['video'], true); ?>" />
+                            <meta itemprop="thumbnailUrl" content="<?= $thumbUrl; ?>" />
                             <meta itemprop="uploadDate" content="<?= date(DATE_W3C, $video['created_at']); ?>" />
-                            <meta itemprop="duration" content="<?= $video['duration']; ?>" />
+
+                            <!-- Обязательное поле description (дублируем заголовок, если нет отдельного описания) -->
+                            <meta itemprop="description" content="<?= Html::encode(strip_tags($video['description'] ?? $video['title'])); ?>" />
+
+                            <?php if (!empty($video['duration'])): ?>
+                                <!-- Формат должен быть строго ISO 8601 (например, PT2M30S) -->
+                                <meta itemprop="duration" content="<?= $video['duration']; ?>" />
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -90,6 +104,6 @@ $(document).ready(function () {
 });
 JS;
 
-$this->registerJs($script); ?>
+    $this->registerJs($script); ?>
 
 <?php endif; ?>

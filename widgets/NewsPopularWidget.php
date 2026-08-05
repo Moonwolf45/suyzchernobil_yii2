@@ -2,15 +2,15 @@
 
 namespace app\widgets;
 
-
 use app\models\News;
 use Yii;
 use yii\bootstrap5\Widget;
 use yii\caching\TagDependency;
 
-class NewsPopularWidget extends Widget {
-
-    public function run() {
+class NewsPopularWidget extends Widget
+{
+    public function run()
+    {
         $dep = new TagDependency(['tags' => 'News']);
 
         $news = Yii::$app->cache->getOrSet(['news_widget'], function () {

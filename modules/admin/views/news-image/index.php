@@ -2,10 +2,10 @@
 
 use app\models\NewsImage;
 use yii\bootstrap5\LinkPager;
-use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 /** @var yii\web\View $this */
 /** @var yii\data\ActiveDataProvider $dataProvider */
@@ -25,12 +25,12 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'id',
             [
                 'attribute' => 'news_id',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return $data->news->title;
                 }
             ], [
                 'attribute' => 'image',
-                'content' => function($data) {
+                'content' => function ($data) {
                     return Html::img('@web/' . $data->image, [
                         'style' => 'max-width: 400px; max-height: 400px; width: auto; height: auto;'
                     ]);

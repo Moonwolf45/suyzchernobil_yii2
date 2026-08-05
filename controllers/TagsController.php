@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-
 use app\models\News;
 use app\models\Tag;
 use app\models\traits\MetaTrait;
@@ -10,13 +9,15 @@ use yii\data\Pagination;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
 
-class TagsController extends Controller {
+class TagsController extends Controller
+{
     use MetaTrait;
 
     /**
      * {@inheritdoc}
      */
-    public function behaviors(): array {
+    public function behaviors(): array
+    {
         return [
             'verbs' => [
                 'class' => VerbFilter::class,
@@ -33,7 +34,8 @@ class TagsController extends Controller {
      *
      * @return string
      */
-    public function actionView($alias, int $page = 1): string {
+    public function actionView($alias, int $page = 1): string
+    {
         $tag = Tag::find()->where(['slug' => $alias])->asArray()->one();
 
         $this->setMeta($this, $tag['title'], $tag['meta_keywords'], $tag['meta_description']);

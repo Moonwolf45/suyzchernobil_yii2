@@ -32,12 +32,12 @@ $this->params['breadcrumbs'][] = $this->title; ?>
             'meta_description',
             [
                 'attribute' => 'created_at',
-                'value' => function($data) {
+                'value' => function ($data) {
                     return Yii::$app->formatter->asDate($data->created_at, 'php:d.m.Y H:i:s');
                 }
             ], [
                 'attribute' => 'updated_at',
-                'value' => function($data) {
+                'value' => function ($data) {
                     return Yii::$app->formatter->asDate($data->updated_at, 'php:d.m.Y H:i:s');
                 }
             ]
