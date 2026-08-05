@@ -6,7 +6,7 @@ parameters:
     bootstrapFiles:
         - vendor/yiisoft/yii2/Yii.php
     yii2:
-        config_path: config/web.php
+        config_path: config/web-phpstan.php
     level: 5
     paths:
         - assets
