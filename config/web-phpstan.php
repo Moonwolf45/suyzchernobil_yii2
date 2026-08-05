@@ -22,6 +22,14 @@ return [
             'class' => 'yii\httpclient\Client',
             'transport' => 'yii\httpclient\CurlTransport',
         ],
+        'queue' => [
+            'class' => 'yii\queue\db\Queue',
+            'tableName' => '{{%queue}}',
+            'channel' => 'default',
+            'mutex' => 'yii\mutex\MysqlMutex',
+            'attempts' => 5,
+            'as log' => 'yii\queue\LogBehavior'
+        ],
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'locale' => 'ru_RU',
@@ -41,6 +49,21 @@ return [
         ],
         'user' => [
             'identityClass' => 'app\models\User',
+        ],
+        'mailer' => [
+            'class' => 'yii\symfonymailer\Mailer',
+            'transport' => [
+                'scheme' => 'smtps',
+                'host' => '',
+                'username' => '',
+                'password' => '',
+                'port' => 465,
+                'dsn' => 'native://default',
+            ],
+            'useFileTransport' => false,
+            'viewPath' => '@app/mail',
+            'htmlLayout' => 'layouts/html',
+            'textLayout' => 'layouts/text',
         ],
         'db' => [
             'class' => 'yii\db\Connection',

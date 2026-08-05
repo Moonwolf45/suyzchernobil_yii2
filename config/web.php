@@ -34,13 +34,13 @@ $config = [
             'secretV3' => $params['secretV3'],
         ],
         'queue' => [
-            'class' => \yii\queue\db\Queue::class,
+            'class' => 'yii\queue\db\Queue',
             'db' => $db,
             'tableName' => '{{%queue}}',
             'channel' => 'default',
-            'mutex' => \yii\mutex\MysqlMutex::class,
+            'mutex' => 'yii\mutex\MysqlMutex',
             'attempts' => 5,
-            'as log' => \yii\queue\LogBehavior::class
+            'as log' => 'yii\queue\LogBehavior'
         ],
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
@@ -68,7 +68,7 @@ $config = [
             'errorAction' => 'news/error',
         ],
         'mailer' => [
-            'class' => yii\symfonymailer\Mailer::class,
+            'class' => ' yii\symfonymailer\Mailer',
             'transport' => [
                 'scheme' => 'smtps',
                 'host' => '',
