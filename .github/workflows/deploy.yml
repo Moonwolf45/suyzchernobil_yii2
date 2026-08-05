@@ -83,7 +83,7 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             cd ${{ secrets.SERVER_PATH }}
-            php yii migrate --interactive=0
+            /usr/local/bin/php8.1 yii migrate --interactive=0
 
       # ============================================
       # Уведомление в Telegram
