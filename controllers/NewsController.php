@@ -179,7 +179,7 @@ class NewsController extends Controller
             ->orderBy([Documents::tableName() . '.fasten' => SORT_DESC, Documents::tableName() . '.id' => SORT_DESC])
             ->asArray()->all();
 
-        return $this->render('documents', compact('documents'));
+        return $this->render('the-soviet-union-last-battle', compact('documents'));
     }
 
     /**
