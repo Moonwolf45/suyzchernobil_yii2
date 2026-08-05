@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  PHP_VERSION: '8.1'
+  PHP_VERSION: '8.3'
   COMPOSER_VERSION: '2'
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer install --prefer-dist --no-progress --no-suggest
+          composer install --prefer-dist --no-progress
 
       - name: 1. Проверка синтаксиса PHP (lint)
         run: |
@@ -130,7 +130,7 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             cd ${{ secrets.SERVER_PATH }}
-            /usr/local/bin/php8.1 yii migrate --interactive=0
+            /usr/local/bin/php8.3 yii migrate --interactive=0
 
       # ============================================
       # Уведомление в Telegram
